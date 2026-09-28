@@ -1,0 +1,634 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Disaster Relief & Humanitarian Assistance — AI-DRIS</title>
+
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="css/styles.css">
+
+    <style>
+        body {
+            background-color: #080c17;
+            color: #f8fafc;
+        }
+    </style>
+</head>
+<body class="antialiased min-h-screen flex flex-col justify-between selection:bg-emerald-600 selection:text-white pb-12">
+
+    <!-- Official Humanitarian Header -->
+    <header class="p-3 bg-[#0d1526] border-b border-[#1a2742] sticky top-0 z-50">
+        <div class="max-w-4xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3">
+            <div class="flex items-center gap-2.5">
+                <div class="w-8 h-8 rounded bg-emerald-950/80 border border-emerald-500/40 flex items-center justify-center text-emerald-400 font-bold text-sm">
+                    🤝
+                </div>
+                <div>
+                    <h1 class="text-sm md:text-base font-extrabold font-mono tracking-wide text-white" data-i18n="portal_title">
+                        AI-DRIS • DISASTER RELIEF ASSISTANCE
+                    </h1>
+                    <p class="text-[11px] text-slate-400 font-mono hidden sm:block" data-i18n="portal_subtitle">
+                        Direct Benefit Transfer (DBT) • Food & Shelter Allocation • Transparency Ledger
+                    </p>
+                </div>
+            </div>
+
+            <!-- Language Pills (Strictly NO Kannada: en, ml, ta, hi) & Quick Links -->
+            <div class="flex items-center gap-2 flex-wrap justify-center">
+                <div class="flex items-center gap-1">
+                    <button type="button" class="lang-pill-btn active" data-lang="en" onclick="setReliefLanguage('en')">English</button>
+                    <button type="button" class="lang-pill-btn" data-lang="ml" onclick="setReliefLanguage('ml')">മലയാളം</button>
+                    <button type="button" class="lang-pill-btn" data-lang="ta" onclick="setReliefLanguage('ta')">தமிழ்</button>
+                    <button type="button" class="lang-pill-btn" data-lang="hi" onclick="setReliefLanguage('hi')">हिंदी</button>
+                </div>
+                <div class="h-4 w-px bg-slate-800 hidden sm:block"></div>
+                <a href="sos.html" class="text-xs font-mono text-rose-400 hover:text-white underline">
+                    🚨 Urgent SOS
+                </a>
+                <a href="funds.html" class="text-xs font-mono text-sky-400 hover:text-white underline">
+                    💼 Fund Ledger
+                </a>
+                <a href="index.html" class="text-xs font-mono text-slate-400 hover:text-white underline hidden md:inline">
+                    Command Centre ↗
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content Area -->
+    <main class="max-w-3xl mx-auto w-full px-4 py-6 space-y-6 flex-1">
+
+        <!-- Informational Welcome Card -->
+        <div class="panel-human p-5 space-y-2 border-l-4 border-l-emerald-500">
+            <h2 class="text-base font-bold font-mono text-white flex items-center gap-2">
+                <span data-i18n="intro_heading">Disaster Victim Assistance & Direct Financial Aid</span>
+            </h2>
+            <p class="text-xs text-slate-300 leading-relaxed font-sans" data-i18n="intro_desc">
+                If your household or property has suffered damage due to natural disasters (floods, landslides, cyclones), register below to apply for immediate food rations, temporary shelter kits, emergency medicine, and Direct Benefit Transfer (DBT) financial assistance. All funds are disbursed transparently via the state disaster relief ledger.
+            </p>
+        </div>
+
+        <!-- Relief Application Form -->
+        <form id="relief-form" class="space-y-5" onsubmit="event.preventDefault(); handleReliefSubmit();">
+            
+            <!-- SECTION 1: Beneficiary Details -->
+            <div class="panel-human p-5 space-y-4">
+                <div class="flex items-center justify-between border-b border-[#1a2742] pb-2.5">
+                    <div class="flex items-center gap-2">
+                        <span class="w-5 h-5 rounded bg-emerald-900/60 text-emerald-400 font-mono font-bold text-xs flex items-center justify-center border border-emerald-500/30">1</span>
+                        <h3 class="text-xs font-bold font-mono uppercase text-white tracking-wider" data-i18n="sec1_title">
+                            Applicant & Household Information
+                        </h3>
+                    </div>
+                    <span class="text-[11px] font-mono text-slate-500">* Required fields</span>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label for="rf-name" class="block text-xs font-mono text-slate-300 mb-1" data-i18n="lbl_name">Full Name of Beneficiary / Family Head *</label>
+                        <input type="text" id="rf-name" required class="tactical-input w-full text-xs font-mono" placeholder="e.g. Radhakrishnan K." value="Radhakrishnan K.">
+                    </div>
+                    <div>
+                        <label for="rf-phone" class="block text-xs font-mono text-slate-300 mb-1" data-i18n="lbl_phone">Mobile / WhatsApp Number *</label>
+                        <input type="tel" id="rf-phone" required class="tactical-input w-full text-xs font-mono" placeholder="e.g. +91 94471 22334" value="+91 94471 22334">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div class="sm:col-span-2">
+                        <label for="rf-location" class="block text-xs font-mono text-slate-300 mb-1" data-i18n="lbl_location">Location / Ward / Village / Sector *</label>
+                        <input type="text" id="rf-location" required class="tactical-input w-full text-xs font-mono" placeholder="e.g. Ward 4, Arumparthapuram Basin, Wayanad" value="Ward 4, Arumparthapuram Basin, Wayanad">
+                    </div>
+                    <div>
+                        <label for="rf-family" class="block text-xs font-mono text-slate-300 mb-1" data-i18n="lbl_family">Family Members</label>
+                        <input type="number" id="rf-family" min="1" max="25" value="4" class="tactical-input w-full text-xs font-mono">
+                    </div>
+                </div>
+
+                <div>
+                    <label for="rf-disaster" class="block text-xs font-mono text-slate-300 mb-1" data-i18n="lbl_disaster">Disaster Encountered *</label>
+                    <select id="rf-disaster" class="tactical-select w-full text-xs font-mono">
+                        <option value="Flood" selected>🌊 Flood / Inundation</option>
+                        <option value="Landslide">⛰️ Landslide / Mudflow</option>
+                        <option value="Cyclone">🌪️ Cyclone / Severe Storm</option>
+                        <option value="Building Collapse">🏚️ Structural / Building Collapse</option>
+                        <option value="Earthquake">🌍 Earthquake</option>
+                        <option value="Fire">🔥 Disaster Fire</option>
+                        <option value="Other">⚡ Other Hazard</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- SECTION 2: Damage & Assistance Requirements -->
+            <div class="panel-human p-5 space-y-4">
+                <div class="flex items-center gap-2 border-b border-[#1a2742] pb-2.5">
+                    <span class="w-5 h-5 rounded bg-emerald-900/60 text-emerald-400 font-mono font-bold text-xs flex items-center justify-center border border-emerald-500/30">2</span>
+                    <h3 class="text-xs font-bold font-mono uppercase text-white tracking-wider" data-i18n="sec2_title">
+                        Damage Assessment & Required Aid
+                    </h3>
+                </div>
+
+                <div>
+                    <label for="rf-damage" class="block text-xs font-mono text-slate-300 mb-1" data-i18n="lbl_damage">Description of Damage & Current Living Condition</label>
+                    <textarea id="rf-damage" rows="3" class="tactical-input w-full text-xs font-mono leading-relaxed" placeholder="Describe damage to dwelling, loss of rations, livestock, household goods...">Ground floor submerged under 3.5 feet flood water. Grain storage and kitchen stove lost. Family temporarily accommodated in neighboring community hall.</textarea>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-mono text-slate-300 mb-2" data-i18n="lbl_aid_categories">Select Types of Assistance Required (Multiple):</label>
+                    <div class="grid grid-cols-2 sm:grid-cols-3 gap-2.5" id="aid-checklist">
+                        <label class="relief-check-card checked" onclick="toggleAidCheck(this)">
+                            <input type="checkbox" name="aid_need" value="Financial Aid" checked>
+                            <span data-i18n="aid_finance">💰 Financial Aid (DBT)</span>
+                        </label>
+                        <label class="relief-check-card checked" onclick="toggleAidCheck(this)">
+                            <input type="checkbox" name="aid_need" value="Food" checked>
+                            <span data-i18n="aid_food">🍲 Food Rations & Water</span>
+                        </label>
+                        <label class="relief-check-card" onclick="toggleAidCheck(this)">
+                            <input type="checkbox" name="aid_need" value="Medicine">
+                            <span data-i18n="aid_medicine">💊 Essential Medicines</span>
+                        </label>
+                        <label class="relief-check-card" onclick="toggleAidCheck(this)">
+                            <input type="checkbox" name="aid_need" value="Shelter">
+                            <span data-i18n="aid_shelter">⛺ Temporary Shelter / Tarpaulin</span>
+                        </label>
+                        <label class="relief-check-card" onclick="toggleAidCheck(this)">
+                            <input type="checkbox" name="aid_need" value="Clothing">
+                            <span data-i18n="aid_clothing">👕 Blankets & Clothing</span>
+                        </label>
+                        <label class="relief-check-card" onclick="toggleAidCheck(this)">
+                            <input type="checkbox" name="aid_need" value="Supplies">
+                            <span data-i18n="aid_supplies">📦 Emergency Relief Kit</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div>
+                    <label for="rf-amount" class="block text-xs font-mono text-slate-300 mb-1" data-i18n="lbl_amount">Estimated Assistance Grant Requested (₹):</label>
+                    <div class="relative">
+                        <span class="absolute left-3 top-2 text-slate-400 font-mono text-xs">₹</span>
+                        <input type="number" id="rf-amount" value="15000" min="1000" step="500" class="tactical-input w-full text-xs font-mono pl-7">
+                    </div>
+                    <span class="text-[10px] font-mono text-slate-500 mt-1 block" data-i18n="amount_note">Standard disaster relief assistance grant norms apply. Subject to field officer verification.</span>
+                </div>
+            </div>
+
+            <!-- Submit Button -->
+            <button type="submit" id="btn-submit-app" class="btn btn-primary w-full py-3 text-sm font-bold tracking-wide">
+                <span>📝</span>
+                <span data-i18n="btn_submit">SUBMIT RELIEF ASSISTANCE APPLICATION</span>
+            </button>
+        </form>
+
+        <!-- Success Confirmation Banner -->
+        <div id="relief-success" class="hidden panel-human p-5 border-l-4 border-l-emerald-500 space-y-3">
+            <div class="flex items-center gap-3">
+                <span class="w-8 h-8 rounded-full bg-emerald-950 text-emerald-400 border border-emerald-500 flex items-center justify-center font-bold">✓</span>
+                <div>
+                    <h3 class="text-sm font-bold font-mono text-white" data-i18n="success_title">Application Registered Successfully</h3>
+                    <p class="text-xs font-mono text-emerald-400" data-i18n="success_sub">Your application has been recorded in the district humanitarian relief ledger.</p>
+                </div>
+            </div>
+            <div class="p-3 bg-[#080d1a] rounded border border-[#1a2742] text-xs font-mono flex items-center justify-between">
+                <span class="text-slate-400" data-i18n="ref_id_label">Application Reference ID:</span>
+                <strong id="new-ref-id" class="text-cyan-400 font-bold tracking-wider">RF-2026-904</strong>
+            </div>
+            <button type="button" class="btn btn-secondary btn-xs font-mono w-full py-2" onclick="trackGeneratedApplication()">
+                🔍 Track Status with Reference ID ➔
+            </button>
+        </div>
+
+        <!-- ================================================================= -->
+        <!-- LIVE 4-STAGE APPLICATION TRACKING PIPELINE                       -->
+        <!-- ================================================================= -->
+        <div class="panel-human p-5 space-y-4" id="tracker-section">
+            <div class="flex items-center justify-between flex-wrap gap-2 border-b border-[#1a2742] pb-3">
+                <div class="flex items-center gap-2">
+                    <span class="text-base">🔍</span>
+                    <h3 class="text-xs font-bold font-mono uppercase text-white tracking-wider" data-i18n="tracker_title">
+                        Live Application Status Tracker
+                    </h3>
+                </div>
+                <span class="text-[11px] font-mono text-emerald-400 bg-emerald-950/60 px-2 py-0.5 rounded border border-emerald-500/30">
+                    ● DBT Disbursement Ledger Synced
+                </span>
+            </div>
+
+            <!-- Search Bar -->
+            <div class="flex gap-2">
+                <input type="text" id="track-input" class="tactical-input flex-1 text-xs font-mono uppercase" placeholder="Enter Reference ID (e.g. RF-2026-101)" value="RF-2026-101">
+                <button type="button" class="btn btn-primary px-4 font-mono font-bold" onclick="lookupApplication()" data-i18n="btn_track">
+                    TRACK STATUS
+                </button>
+            </div>
+
+            <!-- Quick Demo Pills -->
+            <div class="flex items-center gap-1.5 flex-wrap text-[11px] font-mono">
+                <span class="text-slate-500">Quick Samples:</span>
+                <button type="button" class="px-2 py-0.5 rounded bg-[#101b30] text-cyan-300 hover:bg-[#15233e] border border-[#1a2742]" onclick="quickSelect('RF-2026-101')">RF-2026-101 (Pending)</button>
+                <button type="button" class="px-2 py-0.5 rounded bg-[#101b30] text-amber-300 hover:bg-[#15233e] border border-[#1a2742]" onclick="quickSelect('RF-2026-102')">RF-2026-102 (Verification)</button>
+                <button type="button" class="px-2 py-0.5 rounded bg-[#101b30] text-sky-300 hover:bg-[#15233e] border border-[#1a2742]" onclick="quickSelect('RF-2026-103')">RF-2026-103 (Approved)</button>
+                <button type="button" class="px-2 py-0.5 rounded bg-[#101b30] text-emerald-300 hover:bg-[#15233e] border border-[#1a2742]" onclick="quickSelect('RF-2026-104')">RF-2026-104 (Distributed)</button>
+            </div>
+
+            <!-- 4-Stage Stepper -->
+            <div class="p-4 bg-[#0a1122] rounded border border-[#1a2742] space-y-4">
+                <div class="app-stepper" id="tracking-stepper">
+                    <div class="app-step-item active" id="st-pending">
+                        <div class="app-step-circle">1</div>
+                        <span class="app-step-label" data-i18n="st_pending">Pending</span>
+                    </div>
+                    <div class="app-step-line" id="line-a"></div>
+
+                    <div class="app-step-item" id="st-verify">
+                        <div class="app-step-circle">2</div>
+                        <span class="app-step-label" data-i18n="st_verify">Verification</span>
+                    </div>
+                    <div class="app-step-line" id="line-b"></div>
+
+                    <div class="app-step-item" id="st-approved">
+                        <div class="app-step-circle">3</div>
+                        <span class="app-step-label" data-i18n="st_approved">Approved</span>
+                    </div>
+                    <div class="app-step-line" id="line-c"></div>
+
+                    <div class="app-step-item" id="st-distributed">
+                        <div class="app-step-circle">4</div>
+                        <span class="app-step-label" data-i18n="st_distributed">Distributed</span>
+                    </div>
+                </div>
+
+                <!-- Structured Details Grid -->
+                <div class="space-y-2 text-xs font-mono bg-[#070c17] p-3 rounded border border-[#141f36]">
+                    <div class="flex justify-between py-1 border-b border-[#141f36]">
+                        <span class="text-slate-400">Application Reference ID:</span>
+                        <strong id="det-id" class="text-cyan-400">RF-2026-101</strong>
+                    </div>
+                    <div class="flex justify-between py-1 border-b border-[#141f36]">
+                        <span class="text-slate-400">Beneficiary Name:</span>
+                        <span id="det-name" class="text-white font-bold">K. Balan</span>
+                    </div>
+                    <div class="flex justify-between py-1 border-b border-[#141f36]">
+                        <span class="text-slate-400">Sector & Location:</span>
+                        <span id="det-loc" class="text-slate-300">Flood • Ward 4, Arumparthapuram</span>
+                    </div>
+                    <div class="flex justify-between py-1 border-b border-[#141f36]">
+                        <span class="text-slate-400">Assistance Requested:</span>
+                        <span id="det-needs" class="text-emerald-400 font-bold">Food, Shelter, Financial Aid</span>
+                    </div>
+                    <div class="flex justify-between py-1 border-b border-[#141f36]">
+                        <span class="text-slate-400">Grant Status:</span>
+                        <span id="det-amt" class="text-amber-400 font-bold">Requested: ₹15,000</span>
+                    </div>
+                    <div class="flex justify-between py-1 border-b border-[#141f36]">
+                        <span class="text-slate-400">Current Stage:</span>
+                        <span id="det-status-badge" class="px-2 py-0.5 rounded text-[11px] font-bold bg-amber-950 text-amber-300 border border-amber-500/40">
+                            PENDING REVIEW
+                        </span>
+                    </div>
+                    <div id="det-txn-row" class="hidden flex justify-between py-1 border-b border-[#141f36]">
+                        <span class="text-slate-400">Direct Benefit Txn ID:</span>
+                        <span id="det-txn" class="text-emerald-400 font-bold">TXN-RF-92841</span>
+                    </div>
+                    <div class="flex justify-between py-1">
+                        <span class="text-slate-400">Assigned Inspection Authority:</span>
+                        <span id="det-officer" class="text-slate-300">Revenue Inspection Team</span>
+                    </div>
+                </div>
+
+                <!-- Explanation Note -->
+                <div class="p-2.5 rounded bg-[#070c17] border border-[#141f36] text-[11px] font-mono text-slate-300">
+                    ℹ️ <span id="det-explain">Your application has been logged into the district registry and assigned to the local revenue inspector for physical verification.</span>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Dependencies -->
+    <script src="js/config.js"></script>
+    <script src="js/data/sample_data.js"></script>
+    <script src="js/services/reliefFundService.js"></script>
+    <script>
+        // Central Dictionary (Strictly NO Kannada: en, ml, ta, hi)
+        const RELIEF_I18N = {
+            en: {
+                portal_title: "AI-DRIS • DISASTER RELIEF ASSISTANCE",
+                portal_subtitle: "Direct Benefit Transfer (DBT) • Food & Shelter Allocation • Transparency Ledger",
+                intro_heading: "Disaster Victim Assistance & Direct Financial Aid",
+                intro_desc: "If your household or property has suffered damage due to natural disasters (floods, landslides, cyclones), register below to apply for immediate food rations, temporary shelter kits, emergency medicine, and Direct Benefit Transfer (DBT) financial assistance. All funds are disbursed transparently via the state disaster relief ledger.",
+                sec1_title: "Applicant & Household Information",
+                lbl_name: "Full Name of Beneficiary / Family Head *",
+                lbl_phone: "Mobile / WhatsApp Number *",
+                lbl_location: "Location / Ward / Village / Sector *",
+                lbl_family: "Family Members",
+                lbl_disaster: "Disaster Encountered *",
+                sec2_title: "Damage Assessment & Required Aid",
+                lbl_damage: "Description of Damage & Current Living Condition",
+                lbl_aid_categories: "Select Types of Assistance Required (Multiple):",
+                aid_finance: "💰 Financial Aid (DBT)",
+                aid_food: "🍲 Food Rations & Water",
+                aid_medicine: "💊 Essential Medicines",
+                aid_shelter: "⛺ Temporary Shelter / Tarpaulin",
+                aid_clothing: "👕 Blankets & Clothing",
+                aid_supplies: "📦 Emergency Relief Kit",
+                lbl_amount: "Estimated Assistance Grant Requested (₹):",
+                amount_note: "Standard disaster relief assistance grant norms apply. Subject to field officer verification.",
+                btn_submit: "SUBMIT RELIEF ASSISTANCE APPLICATION",
+                success_title: "Application Registered Successfully",
+                success_sub: "Your application has been recorded in the district humanitarian relief ledger.",
+                ref_id_label: "Application Reference ID:",
+                tracker_title: "Live Application Status Tracker",
+                btn_track: "TRACK STATUS",
+                st_pending: "Pending",
+                st_verify: "Verification",
+                st_approved: "Approved",
+                st_distributed: "Distributed"
+            },
+            ml: {
+                portal_title: "AI-DRIS • ദുരിതാശ്വാസ സഹായം",
+                portal_subtitle: "പ്രത്യക്ഷ ആനുകൂല്യ കൈമാറ്റം (DBT) • ഭക്ഷ്യ-താമസ വിതരണം • സുതാര്യ ലെഡ്ജർ",
+                intro_heading: "ദുരന്തബാധിതർക്കുള്ള ധനസഹായവും പുനരധിവാസവും",
+                intro_desc: "വെള്ളപ്പൊക്കം, ഉരുൾപൊട്ടൽ, ചുഴലിക്കാറ്റ് തുടങ്ങിയ ദുരന്തങ്ങളിൽ നാശനഷ്ടം സംഭവിച്ചവർക്ക് അടിയന്തര ഭക്ഷ്യധാന്യങ്ങൾ, താൽക്കാലിക ഷെൽട്ടർ, മരുന്നുകൾ, ബാങ്ക് ധനസഹായം എന്നിവയ്ക്കായി ഇവിടെ അപേക്ഷിക്കാം.",
+                sec1_title: "അപേക്ഷകന്റെ വിവരങ്ങൾ",
+                lbl_name: "അപേക്ഷകന്റെ പൂർണ്ണ നാമം *",
+                lbl_phone: "മൊബൈൽ / വാട്സ്ആപ്പ് നമ്പർ *",
+                lbl_location: "സ്ഥലം / വാർഡ് / വില്ലേജ് *",
+                lbl_family: "കുടുംബാംഗങ്ങൾ",
+                lbl_disaster: "ബാധിച്ച ദുരന്തം *",
+                sec2_title: "നാശനഷ്ടങ്ങളും ആവശ്യമായ സഹായങ്ങളും",
+                lbl_damage: "നാശനഷ്ടങ്ങളുടെ വിശദാംശങ്ങൾ",
+                lbl_aid_categories: "ആവശ്യമായ സഹായങ്ങൾ തിരഞ്ഞെടുക്കുക:",
+                aid_finance: "💰 ബാങ്ക് ധനസഹായം (DBT)",
+                aid_food: "🍲 ഭക്ഷ്യധാന്യ കിറ്റ്",
+                aid_medicine: "💊 അത്യാവശ്യ മരുന്നുകൾ",
+                aid_shelter: "⛺ താൽക്കാലിക ഷെൽട്ടർ",
+                aid_clothing: "👕 വസ്ത്രങ്ങൾ / പുതപ്പുകൾ",
+                aid_supplies: "📦 എമർജൻസി കിറ്റ്",
+                lbl_amount: "ആവശ്യപ്പെടുന്ന തുക (₹):",
+                amount_note: "സർക്കാർ മാനദണ്ഡങ്ങൾക്കനുസൃതമായി ഉദ്യോഗസ്ഥ പരിശോധനയ്ക്ക് വിധേയമായിരിക്കും.",
+                btn_submit: "ദുരിതാശ്വാസ സഹായത്തിന് അപേക്ഷിക്കുക",
+                success_title: "അപേക്ഷ വിജയകരമായി സമർപ്പിച്ചു",
+                success_sub: "നിങ്ങളുടെ അപേക്ഷ ദുരിതാശ്വാസ രജിസ്റ്ററിൽ രേഖപ്പെടുത്തി.",
+                ref_id_label: "അപേക്ഷാ റഫറൻസ് നമ്പർ:",
+                tracker_title: "അപേക്ഷയുടെ തത്സമയ പുരോഗതി",
+                btn_track: "പരിശോധിക്കുക",
+                st_pending: "ലഭിച്ചു",
+                st_verify: "പരിശോധന",
+                st_approved: "അംഗീകരിച്ചു",
+                st_distributed: "വിതരണം ചെയ്തു"
+            },
+            ta: {
+                portal_title: "AI-DRIS • பேரிடர் நிவாரண உதவி",
+                portal_subtitle: "நேரடி வங்கி நிதி உதவி (DBT) • உணவு மற்றும் இருப்பிடப் பகிர்வு",
+                intro_heading: "பாதிக்கப்பட்ட மக்களுக்கான நிவாரணம் மற்றும் நிதி உதவி",
+                intro_desc: "வெள்ளம், நிலச்சரிவு, புயல் போன்றவற்றால் பாதிக்கப்பட்ட குடும்பங்கள் உணவுப் பொருட்கள், தற்காலிக தங்குமிடம், அவசர மருந்துகள் மற்றும் நேரடி நிதி உதவி பெற விண்ணப்பிக்கலாம்.",
+                sec1_title: "விண்ணப்பதாரர் விவரங்கள்",
+                lbl_name: "விண்ணப்பதாரரின் முழுப் பெயர் *",
+                lbl_phone: "கைபேசி / வாட்ஸ்அப் எண் *",
+                lbl_location: "இடம் / கிராமம் / வார்டு *",
+                lbl_family: "குடும்ப உறுப்பினர்கள்",
+                lbl_disaster: "பாதிக்கப்பட்ட பேரிடர் *",
+                sec2_title: "சேத விவரங்கள் மற்றும் தேவையான உதவி",
+                lbl_damage: "சேதமடைந்த விவரங்கள்",
+                lbl_aid_categories: "தேவையான உதவிகளைத் தேர்ந்தெடுக்கவும்:",
+                aid_finance: "💰 நேரடி வங்கி நிதி உதவி (DBT)",
+                aid_food: "🍲 உணவு மற்றும் ரேஷன்",
+                aid_medicine: "💊 மருத்துவ உதவி",
+                aid_shelter: "⛺ தற்காலிக தங்குமிடம்",
+                aid_clothing: "👕 ஆடைகள் / போர்வைகள்",
+                aid_supplies: "📦 அவசர நிவாரண தொகுப்பு",
+                lbl_amount: "கோரப்படும் நிதி உதவி (₹):",
+                amount_note: "அரசு விதிகளுக்குட்பட்டு கள ஆய்வுக்குப் பின் வழங்கப்படும்.",
+                btn_submit: "நிவாரண உதவிக்கு விண்ணப்பிக்கவும்",
+                success_title: "விண்ணப்பம் வெற்றிகரமாக பதிவு செய்யப்பட்டது",
+                success_sub: "உங்கள் விண்ணப்பம் பதிவேட்டில் சேர்க்கப்பட்டது.",
+                ref_id_label: "விண்ணப்ப குறிப்பு எண்:",
+                tracker_title: "விண்ணப்ப நிலை கண்காணிப்பு",
+                btn_track: "கண்காணி",
+                st_pending: "பெறப்பட்டது",
+                st_verify: "சரிபார்ப்பு",
+                st_approved: "ஒப்புதல்",
+                st_distributed: "வழங்கப்பட்டது"
+            },
+            hi: {
+                portal_title: "AI-DRIS • आपदा राहत सहायता",
+                portal_subtitle: "प्रत्यक्ष लाभ अंतरण (DBT) • भोजन एवं आश्रय आवंटन • पारदर्शिता लेजर",
+                intro_heading: "आपदा पीड़ितों के लिए राहत एवं प्रत्यक्ष वित्तीय सहायता",
+                intro_desc: "बाढ़, भूस्खलन या चक्रवात से प्रभावित परिवार आपातकालीन भोजन राशन, अस्थायी आश्रय, दवाइयाँ और प्रत्यक्ष बैंक वित्तीय सहायता (DBT) के लिए यहाँ पंजीकरण कर सकते हैं।",
+                sec1_title: "आवेदक एवं परिवार का विवरण",
+                lbl_name: "आवेदक का पूरा नाम *",
+                lbl_phone: "मोबाइल / व्हाट्सएप नंबर *",
+                lbl_location: "स्थान / गाँव / वार्ड *",
+                lbl_family: "परिवार के सदस्य",
+                lbl_disaster: "आपदा का प्रकार *",
+                sec2_title: "नुकसान का विवरण एवं आवश्यक सहायता",
+                lbl_damage: "क्षति एवं वर्तमान स्थिति का विवरण",
+                lbl_aid_categories: "आवश्यक राहत सहायता चुनें:",
+                aid_finance: "💰 प्रत्यक्ष वित्तीय सहायता (DBT)",
+                aid_food: "🍲 भोजन एवं राशन सामग्री",
+                aid_medicine: "💊 आवश्यक दवाइयाँ",
+                aid_shelter: "⛺ अस्थायी आश्रय / तिरपाल",
+                aid_clothing: "👕 कपड़े / कंबल",
+                aid_supplies: "📦 आपातकालीन राहत किट",
+                lbl_amount: "अनुमानित सहायता राशि (₹):",
+                amount_note: "मानकों के अनुरूप राजस्व अधिकारी के सत्यापन के अधीन।",
+                btn_submit: "राहत सहायता आवेदन जमा करें",
+                success_title: "आवेदन सफलतापूर्वक दर्ज हुआ",
+                success_sub: "आपका आवेदन पारदर्शी राहत रजिस्टर में दर्ज कर लिया गया है।",
+                ref_id_label: "आवेदन संदर्भ संख्या:",
+                tracker_title: "लाइव आवेदन स्थिति जांच",
+                btn_track: "जांचें",
+                st_pending: "प्राप्त हुआ",
+                st_verify: "सत्यापन",
+                st_approved: "स्वीकृत",
+                st_distributed: "वितरित"
+            }
+        };
+
+        function setReliefLanguage(langCode) {
+            if (!['en', 'ml', 'ta', 'hi'].includes(langCode)) langCode = 'en';
+            localStorage.setItem('drc_citizen_lang', langCode);
+
+            document.querySelectorAll('.lang-pill-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.getAttribute('data-lang') === langCode);
+            });
+
+            const dict = RELIEF_I18N[langCode] || RELIEF_I18N.en;
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const k = el.getAttribute('data-i18n');
+                if (dict[k]) el.innerText = dict[k];
+            });
+        }
+
+        function toggleAidCheck(labelEl) {
+            const cb = labelEl.querySelector('input[type="checkbox"]');
+            if (cb) labelEl.classList.toggle('checked', cb.checked);
+        }
+
+        async function handleReliefSubmit() {
+            const name = document.getElementById('rf-name').value.trim();
+            const phone = document.getElementById('rf-phone').value.trim();
+            const location = document.getElementById('rf-location').value.trim();
+            const disasterType = document.getElementById('rf-disaster').value;
+            const familySize = parseInt(document.getElementById('rf-family').value, 10) || 4;
+            const damageDetails = document.getElementById('rf-damage').value.trim();
+            const amountRequested = parseFloat(document.getElementById('rf-amount').value) || 15000;
+
+            const needs = [];
+            document.querySelectorAll('input[name="aid_need"]:checked').forEach(cb => needs.push(cb.value));
+
+            const appPayload = {
+                name, phone, location, disasterType, familySize,
+                damageDetails, assistanceRequired: needs.length > 0 ? needs : ["Food"],
+                amountRequested
+            };
+
+            let record = null;
+            if (typeof reliefFundService !== 'undefined') {
+                record = reliefFundService.registerVictim(appPayload);
+            }
+
+            try {
+                const res = await fetch('/api/relief/apply', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(appPayload)
+                });
+                const data = await res.json();
+                if (data.beneficiary && !record) record = data.beneficiary;
+            } catch(e) {}
+
+            const refId = record ? record.id : `RF-2026-${Math.floor(100 + Math.random() * 900)}`;
+
+            document.getElementById('new-ref-id').innerText = refId;
+            document.getElementById('relief-success').classList.remove('hidden');
+            document.getElementById('track-input').value = refId;
+            lookupApplication(refId);
+
+            document.getElementById('relief-success').scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+
+        function trackGeneratedApplication() {
+            const refId = document.getElementById('new-ref-id').innerText.trim();
+            document.getElementById('tracker-section').scrollIntoView({ behavior: 'smooth', block: 'start' });
+            lookupApplication(refId);
+        }
+
+        function quickSelect(id) {
+            document.getElementById('track-input').value = id;
+            lookupApplication(id);
+        }
+
+        async function lookupApplication(targetId) {
+            const refId = targetId || document.getElementById('track-input').value.trim();
+            if (!refId) return;
+
+            let b = null;
+            if (typeof reliefFundService !== 'undefined') {
+                b = reliefFundService.getBeneficiaryById(refId);
+            }
+            if (!b) {
+                try {
+                    const res = await fetch(`/api/relief/track/${encodeURIComponent(refId)}`);
+                    const data = await res.json();
+                    if (data.success && data.beneficiary) b = data.beneficiary;
+                } catch(e) {}
+            }
+            if (!b && typeof SAMPLE_BENEFICIARIES !== 'undefined') {
+                b = SAMPLE_BENEFICIARIES.find(x => x.id.toLowerCase() === refId.toLowerCase());
+            }
+
+            if (!b) {
+                alert(`Reference ID '${refId}' not found in registry.`);
+                return;
+            }
+
+            renderTrackingCard(b);
+        }
+
+        function renderTrackingCard(b) {
+            document.getElementById('det-id').innerText = b.id;
+            document.getElementById('det-name').innerText = b.name;
+            document.getElementById('det-loc').innerText = `${b.disasterType} • ${b.location}`;
+            document.getElementById('det-needs').innerText = Array.isArray(b.assistanceRequired) ? b.assistanceRequired.join(', ') : b.assistanceRequired;
+            
+            const amtEl = document.getElementById('det-amt');
+            if (b.status === 'Distributed' || b.status === 'Approved') {
+                amtEl.innerText = `Sanctioned: ₹${(b.amountApproved || b.amountRequested).toLocaleString('en-IN')}`;
+                amtEl.className = 'text-emerald-400 font-bold';
+            } else {
+                amtEl.innerText = `Requested: ₹${(b.amountRequested || 15000).toLocaleString('en-IN')}`;
+                amtEl.className = 'text-amber-400 font-bold';
+            }
+
+            const badge = document.getElementById('det-status-badge');
+            badge.innerText = b.status.toUpperCase();
+
+            const stPending = document.getElementById('st-pending');
+            const stVerify = document.getElementById('st-verify');
+            const stApp = document.getElementById('st-approved');
+            const stDist = document.getElementById('st-distributed');
+            const la = document.getElementById('line-a');
+            const lb = document.getElementById('line-b');
+            const lc = document.getElementById('line-c');
+            const txnRow = document.getElementById('det-txn-row');
+            const txnId = document.getElementById('det-txn');
+            const officer = document.getElementById('det-officer');
+            const explain = document.getElementById('det-explain');
+
+            [stPending, stVerify, stApp, stDist].forEach(s => s.className = 'app-step-item');
+            [la, lb, lc].forEach(l => l.className = 'app-step-line');
+
+            const status = b.status || 'Pending';
+
+            if (status === 'Pending') {
+                stPending.className = 'app-step-item active';
+                badge.className = 'px-2 py-0.5 rounded text-[11px] font-bold bg-amber-950 text-amber-300 border border-amber-500/40';
+                txnRow.classList.add('hidden');
+                explain.innerText = "Application received and logged into district registry. Awaiting inspection team assignment.";
+                officer.innerText = "Revenue Inspection Team";
+            } else if (status === 'Under Verification') {
+                stPending.className = 'app-step-item done';
+                la.className = 'app-step-line done';
+                stVerify.className = 'app-step-item active';
+                badge.className = 'px-2 py-0.5 rounded text-[11px] font-bold bg-sky-950 text-sky-300 border border-sky-500/40';
+                txnRow.classList.add('hidden');
+                explain.innerText = "Revenue Inspector assigned. On-ground loss verification and damage documentation underway.";
+                officer.innerText = b.verifiedBy || "Field Inspector #03";
+            } else if (status === 'Approved') {
+                stPending.className = 'app-step-item done';
+                la.className = 'app-step-line done';
+                stVerify.className = 'app-step-item done';
+                lb.className = 'app-step-line done';
+                stApp.className = 'app-step-item active';
+                badge.className = 'px-2 py-0.5 rounded text-[11px] font-bold bg-indigo-950 text-indigo-300 border border-indigo-500/40';
+                txnRow.classList.add('hidden');
+                explain.innerText = "Sanction approved! Direct Benefit Transfer (DBT) grant has been authorized for payment disbursement.";
+                officer.innerText = b.verifiedBy || "Disaster Finance Officer";
+            } else if (status === 'Distributed') {
+                stPending.className = 'app-step-item done';
+                la.className = 'app-step-line done';
+                stVerify.className = 'app-step-item done';
+                lb.className = 'app-step-line done';
+                stApp.className = 'app-step-item done';
+                lc.className = 'app-step-line done';
+                stDist.className = 'app-step-item done active';
+                badge.className = 'px-2 py-0.5 rounded text-[11px] font-bold bg-emerald-950 text-emerald-300 border border-emerald-500/40';
+                txnRow.classList.remove('hidden');
+                txnId.innerText = b.txnId || 'TXN-RF-88219';
+                explain.innerText = "Relief assistance disbursed! Direct Benefit Transfer credit released / relief packages provided.";
+                officer.innerText = b.verifiedBy || "Disaster Relief Disbursement Cell";
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const savedLang = localStorage.getItem('drc_citizen_lang') || 'en';
+            setReliefLanguage(savedLang);
+            lookupApplication('RF-2026-101');
+        });
+    </script>
+</body>
+</html>

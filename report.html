@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>📢 REPORT A DISASTER — AI-DRIS Community Gateway</title>
+
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="css/styles.css">
+
+    <style>
+        body {
+            background-color: #060a14;
+            color: #f1f5f9;
+        }
+        .incident-type-btn {
+            background: #0d1527;
+            border: 1px solid #1e2f4f;
+            border-radius: 8px;
+            padding: 0.75rem 0.5rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 0.35rem;
+            cursor: pointer;
+            transition: all 0.15s;
+            font-family: ui-monospace, monospace;
+        }
+        .incident-type-btn:hover {
+            border-color: #f59e0b;
+            background: #14223d;
+        }
+        .incident-type-btn.selected {
+            border-color: #f59e0b;
+            background: rgba(245, 158, 11, 0.2);
+            color: #ffffff;
+            box-shadow: 0 0 14px rgba(245, 158, 11, 0.3);
+        }
+    </style>
+</head>
+<body class="antialiased min-h-screen flex flex-col justify-between selection:bg-amber-500 selection:text-white pb-12">
+
+    <!-- Top Navigation Header -->
+    <header class="p-3 bg-amber-950/70 border-b border-amber-500/50 flex items-center justify-between sticky top-0 z-50 backdrop-blur-md">
+        <div class="flex items-center gap-2">
+            <span class="w-2.5 h-2.5 rounded-full bg-amber-400"></span>
+            <span class="font-mono font-black text-sm md:text-base tracking-wider text-white">
+                📢 AI-DRIS • CITIZEN DISASTER REPORT
+            </span>
+        </div>
+        <div class="flex items-center gap-2">
+            <a href="sos.html" class="text-xs font-mono text-rose-400 hover:underline">
+                🚨 Need Life Rescue? Go to SOS ↗
+            </a>
+            <a href="index.html" class="text-xs font-mono text-slate-400 hover:text-white underline ml-3 hidden sm:inline">
+                Command Terminal ↗
+            </a>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="max-w-xl mx-auto w-full px-4 py-6 space-y-6 flex-1">
+
+        <div id="report-form-view" class="space-y-5">
+            <!-- Header Explainer -->
+            <div class="text-center space-y-1">
+                <h1 class="text-2xl md:text-3xl font-black font-mono tracking-tight text-white flex items-center justify-center gap-2">
+                    <span class="text-amber-400">📢</span>
+                    <span>REPORT A DISASTER</span>
+                </h1>
+                <p class="text-xs text-slate-300 font-mono bg-slate-900/80 p-2.5 rounded-lg border border-slate-800">
+                    Report a dangerous situation even if you do not personally need rescue.
+                    This alert assists civil defense, road authorities, and rescue dispatchers.
+                </p>
+            </div>
+
+            <!-- 1. Disaster Type -->
+            <div class="card p-4 bg-[#090f1e] border border-slate-700 rounded-xl space-y-2.5">
+                <label class="text-xs font-bold font-mono uppercase text-slate-300 block">
+                    Disaster / Hazard Category:
+                </label>
+                <div class="grid grid-cols-3 gap-2" id="report-type-grid">
+                    <button type="button" class="incident-type-btn" data-type="Flood">
+                        <span class="text-2xl">🌊</span>
+                        <span class="text-xs font-bold">Flood</span>
+                    </button>
+                    <button type="button" class="incident-type-btn" data-type="Fire">
+                        <span class="text-2xl">🔥</span>
+                        <span class="text-xs font-bold">Fire</span>
+                    </button>
+                    <button type="button" class="incident-type-btn" data-type="Cyclone">
+                        <span class="text-2xl">🌪️</span>
+                        <span class="text-xs font-bold">Cyclone</span>
+                    </button>
+                    <button type="button" class="incident-type-btn" data-type="Earthquake">
+                        <span class="text-2xl">🌍</span>
+                        <span class="text-xs font-bold">Earthquake</span>
+                    </button>
+                    <button type="button" class="incident-type-btn" data-type="Landslide">
+                        <span class="text-2xl">⛰️</span>
+                        <span class="text-xs font-bold">Landslide</span>
+                    </button>
+                    <button type="button" class="incident-type-btn" data-type="Building Damage">
+                        <span class="text-2xl">🏚️</span>
+                        <span class="text-xs font-bold">Building Damage</span>
+                    </button>
+                    <button type="button" class="incident-type-btn selected" data-type="Bridge Damage">
+                        <span class="text-2xl">🌉</span>
+                        <span class="text-xs font-bold">Bridge Damage</span>
+                    </button>
+                    <button type="button" class="incident-type-btn" data-type="Road Blockage">
+                        <span class="text-2xl">🚧</span>
+                        <span class="text-xs font-bold">Road Block</span>
+                    </button>
+                    <button type="button" class="incident-type-btn" data-type="Other">
+                        <span class="text-2xl">⚠️</span>
+                        <span class="text-xs font-bold">Other</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- 2. Location -->
+            <div class="card p-4 bg-[#090f1e] border border-slate-700 rounded-xl space-y-2">
+                <div class="flex items-center justify-between">
+                    <label class="text-xs font-bold font-mono uppercase text-slate-300 block">
+                        📍 Incident Location:
+                    </label>
+                    <button type="button" class="btn btn-secondary btn-xs font-mono" onclick="detectReportLocation()">
+                        Detect Location
+                    </button>
+                </div>
+                <div class="p-2.5 bg-slate-900 rounded font-mono text-xs text-cyan-300 space-y-0.5">
+                    <div id="report-loc-coords">11.9290° N, 79.8180° E</div>
+                    <div id="report-loc-name" class="text-slate-400 text-[11px]">North River Causeway Marker #4</div>
+                </div>
+            </div>
+
+            <!-- 3. People Affected -->
+            <div class="card p-4 bg-[#090f1e] border border-slate-700 rounded-xl space-y-2">
+                <label class="text-xs font-bold font-mono uppercase text-slate-300 block">
+                    Estimated People Affected in Vicinity:
+                </label>
+                <div class="flex items-center justify-between p-2 bg-slate-900 rounded-lg">
+                    <span class="text-xs font-mono text-slate-300">People Impacted:</span>
+                    <div class="flex items-center gap-3">
+                        <button type="button" id="btn-dec-affected" class="w-10 h-10 rounded bg-slate-800 border border-slate-700 text-xl font-bold">
+                            −
+                        </button>
+                        <span id="display-affected-count" class="text-2xl font-black font-mono text-amber-400 w-12 text-center">10</span>
+                        <button type="button" id="btn-inc-affected" class="w-10 h-10 rounded bg-slate-800 border border-slate-700 text-xl font-bold">
+                            +
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 4. Description -->
+            <div class="card p-4 bg-[#090f1e] border border-slate-700 rounded-xl space-y-2">
+                <label class="text-xs font-bold font-mono uppercase text-slate-300 block">
+                    Description of Hazard:
+                </label>
+                <textarea id="report-description" rows="3" class="tactical-input w-full text-xs" placeholder="Describe the damage, road condition, or danger...">Central bridge pillar cracked due to heavy flood current. Traffic halted on eastern causeway.</textarea>
+            </div>
+
+            <!-- 5. Voice Note -->
+            <div class="card p-4 bg-[#090f1e] border border-slate-700 rounded-xl space-y-2">
+                <label class="text-xs font-bold font-mono uppercase text-slate-300 block">
+                    🎤 Record Voice Note (Optional):
+                </label>
+                <div class="flex items-center justify-between p-2.5 bg-slate-900 rounded">
+                    <div class="flex items-center gap-2 font-mono text-xs">
+                        <button type="button" id="btn-report-voice" class="w-9 h-9 rounded-full bg-amber-600 hover:bg-amber-500 text-white flex items-center justify-center">
+                            🎤
+                        </button>
+                        <span id="report-voice-status" class="text-slate-300">Click to record voice note</span>
+                    </div>
+                    <span class="text-[10px] text-slate-500 font-mono">Max 30s</span>
+                </div>
+            </div>
+
+            <!-- 6. Photo Upload & Preview -->
+            <div class="card p-4 bg-[#090f1e] border border-slate-700 rounded-xl space-y-2.5">
+                <label class="text-xs font-bold font-mono uppercase text-slate-300 block">
+                    📷 Photo Evidence:
+                </label>
+                
+                <div class="flex items-center gap-2">
+                    <select id="report-photo-preset" class="tactical-select text-xs flex-1" onchange="onPresetPhotoSelected(this.value)">
+                        <option value="https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?w=600&auto=format&fit=crop&q=60">📸 Preset: Cracked River Bridge</option>
+                        <option value="https://images.unsplash.com/photo-1547683905-f686c993aae5?w=600&auto=format&fit=crop&q=60">📸 Preset: Flooded Arterial Road</option>
+                        <option value="https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=600&auto=format&fit=crop&q=60">📸 Preset: Structural Wall Failure</option>
+                    </select>
+                </div>
+
+                <div class="rounded overflow-hidden border border-slate-700 max-h-40">
+                    <img id="report-photo-preview" src="https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?w=600&auto=format&fit=crop&q=60" alt="Incident damage photo" class="w-full h-40 object-cover">
+                </div>
+            </div>
+
+            <!-- SUBMIT BUTTON -->
+            <button type="button" id="btn-submit-incident" class="w-full py-3.5 rounded-xl bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-500 hover:to-orange-500 text-white font-black font-mono text-base tracking-wider uppercase shadow-xl shadow-amber-600/30 active:scale-[0.98] transition flex items-center justify-center gap-2">
+                <span>📢</span>
+                <span>SUBMIT INCIDENT REPORT</span>
+            </button>
+        </div>
+
+        <!-- Confirmation View -->
+        <div id="report-confirmation-view" class="hidden space-y-5">
+            <div class="card p-6 bg-slate-900/90 border-2 border-amber-500/60 rounded-2xl text-center space-y-4">
+                <div class="w-14 h-14 rounded-full bg-amber-500/20 border-2 border-amber-400 text-amber-400 flex items-center justify-center text-2xl mx-auto">
+                    ✓
+                </div>
+
+                <div class="space-y-1">
+                    <h2 class="text-xl font-black font-mono text-white">
+                        Incident Reported Successfully
+                    </h2>
+                    <p class="text-xs text-slate-400 font-mono">
+                        The Command Centre has registered this as an INCIDENT in the community hazard ledger.
+                    </p>
+                </div>
+
+                <div class="space-y-2 text-xs font-mono bg-slate-800/70 p-3.5 rounded-xl text-left border border-slate-700">
+                    <div class="flex justify-between py-1 border-b border-slate-700">
+                        <span class="text-slate-400">Incident ID:</span>
+                        <strong id="incident-confirm-id" class="text-amber-400 text-sm">#IN2031</strong>
+                    </div>
+                    <div class="flex justify-between py-1 border-b border-slate-700">
+                        <span class="text-slate-400">Classification:</span>
+                        <span class="report-type-badge-incident">📢 INCIDENT REPORT</span>
+                    </div>
+                    <div class="flex justify-between py-1 border-b border-slate-700">
+                        <span class="text-slate-400">Disaster Category:</span>
+                        <strong id="incident-confirm-type" class="text-white">Bridge Damage</strong>
+                    </div>
+                    <div class="flex justify-between py-1">
+                        <span class="text-slate-400">Status:</span>
+                        <span class="text-yellow-400 font-bold">Forwarded to Civil Defense & Traffic Routing</span>
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-3 pt-2">
+                    <button class="btn btn-primary btn-sm w-full" onclick="window.location.href='index.html#view-incidents'">
+                        View in Command Centre
+                    </button>
+                    <button class="btn btn-secondary btn-sm w-full" onclick="resetIncidentForm()">
+                        Report Another Hazard
+                    </button>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Dependencies -->
+    <script src="js/config.js"></script>
+    <script src="js/data/sample_data.js"></script>
+    <script src="js/services/aiAnalysisService.js"></script>
+    <script src="js/services/sosService.js"></script>
+    <script src="js/incidentReport.js"></script>
+</body>
+</html>

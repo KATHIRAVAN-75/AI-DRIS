@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Disaster Relief Fund Management & Transparency — AI-DRIS</title>
+
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="css/styles.css">
+
+    <style>
+        body {
+            background-color: #080c17;
+            color: #f8fafc;
+        }
+    </style>
+</head>
+<body class="antialiased min-h-screen flex flex-col justify-between selection:bg-sky-500 selection:text-white pb-12">
+
+    <!-- Top Management Navigation Header -->
+    <header class="p-3.5 bg-[#0d1526] border-b border-[#1a2742] sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-3">
+            <div class="flex items-center gap-3">
+                <div class="w-9 h-9 rounded bg-sky-950/80 border border-sky-500/40 flex items-center justify-center text-sky-400 font-bold text-base">
+                    💼
+                </div>
+                <div>
+                    <div class="flex items-center gap-2">
+                        <h1 class="text-sm md:text-base font-extrabold font-mono tracking-wide text-white">
+                            AI-DRIS • DISASTER RELIEF FUND MANAGEMENT
+                        </h1>
+                        <span class="text-[10px] font-mono uppercase bg-[#101b30] text-emerald-400 px-2 py-0.5 rounded border border-[#1a2742]">
+                            TREASURY & AUDIT
+                        </span>
+                    </div>
+                    <p class="text-[11px] text-slate-400 font-mono">
+                        Direct Benefit Transfer (DBT) Oversight • Beneficiary Sanctions • Public Expenditure Ledger
+                    </p>
+                </div>
+            </div>
+
+            <!-- Portal Links -->
+            <div class="flex items-center gap-3 flex-wrap">
+                <a href="relief.html" class="btn btn-secondary btn-xs text-emerald-400 border-emerald-500/30">
+                    <span>🤝</span>
+                    <span>Citizen Relief Portal</span>
+                </a>
+                <a href="sos.html" class="btn btn-secondary btn-xs text-rose-400 border-rose-500/30">
+                    <span>🚨</span>
+                    <span>Emergency SOS</span>
+                </a>
+                <a href="index.html" class="btn btn-primary btn-xs">
+                    <span>🏠</span>
+                    <span>Command Centre ↗</span>
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="max-w-7xl mx-auto w-full px-4 py-6 space-y-6 flex-1">
+
+        <!-- Executive Treasury KPI Grid -->
+        <div class="grid grid-cols-2 lg:grid-cols-5 gap-3.5" id="funds-kpi-grid">
+            <div class="stat-card-human">
+                <span class="stat-title">Total Collected</span>
+                <span class="stat-val text-white" id="kpi-collected">₹1,25,00,000</span>
+                <span class="stat-meta">State & CSR Pool</span>
+            </div>
+            <div class="stat-card-human">
+                <span class="stat-title">Disbursed (DBT)</span>
+                <span class="stat-val text-emerald-400" id="kpi-distributed">₹78,70,000</span>
+                <span class="stat-meta" id="kpi-dist-pct">63.0% allocated</span>
+            </div>
+            <div class="stat-card-human">
+                <span class="stat-title">Unallocated Reserve</span>
+                <span class="stat-val text-sky-400" id="kpi-remaining">₹46,30,000</span>
+                <span class="stat-meta">Liquidity Ready</span>
+            </div>
+            <div class="stat-card-human">
+                <span class="stat-title">Beneficiaries Assisted</span>
+                <span class="stat-val text-purple-400" id="kpi-verified">48</span>
+                <span class="stat-meta">Verified Households</span>
+            </div>
+            <div class="stat-card-human col-span-2 lg:col-span-1">
+                <span class="stat-title">Pending Sanctions</span>
+                <span class="stat-val text-amber-400" id="kpi-pending">2</span>
+                <span class="stat-meta">Awaiting Approval</span>
+            </div>
+        </div>
+
+        <!-- Management Navigation Tabs -->
+        <div class="flex items-center gap-1.5 p-1 bg-[#0b1222] border border-[#1a2742] rounded-md overflow-x-auto">
+            <button type="button" class="funds-tab-btn active" data-tab="applications" onclick="switchFundTab('applications')">
+                📋 Beneficiary Applications & Approvals
+            </button>
+            <button type="button" class="funds-tab-btn" data-tab="ledger" onclick="switchFundTab('ledger')">
+                🏛️ Public Distribution Ledger (DBT)
+            </button>
+            <button type="button" class="funds-tab-btn" data-tab="categories" onclick="switchFundTab('categories')">
+                📊 Allocation by Category
+            </button>
+            <button type="button" class="funds-tab-btn" data-tab="inflows" onclick="switchFundTab('inflows')">
+                💰 Contribution Streams & Inflows
+            </button>
+        </div>
+
+        <!-- ================================================================= -->
+        <!-- TAB 1: BENEFICIARY APPLICATIONS & APPROVALS                      -->
+        <!-- ================================================================= -->
+        <div id="tab-applications" class="space-y-4">
+            
+            <!-- Controls & Filters Bar -->
+            <div class="panel-human p-3.5 flex flex-col md:flex-row items-center justify-between gap-3">
+                <div class="flex items-center gap-2 w-full md:w-auto">
+                    <span class="text-xs font-mono text-slate-400">Filter Status:</span>
+                    <select id="filter-status" class="tactical-select text-xs py-1" onchange="renderBeneficiariesTable()">
+                        <option value="ALL">All Applications</option>
+                        <option value="Pending">Pending Review</option>
+                        <option value="Under Verification">Under Verification</option>
+                        <option value="Approved">Approved / Sanctioned</option>
+                        <option value="Distributed">Assistance Distributed</option>
+                    </select>
+                </div>
+
+                <div class="flex items-center gap-2 w-full md:w-auto">
+                    <input type="text" id="search-beneficiary" class="tactical-input text-xs flex-1 md:w-72" placeholder="Search by ID, name, location, disaster..." oninput="renderBeneficiariesTable()">
+                    <button type="button" class="btn btn-secondary btn-sm" onclick="renderBeneficiariesTable()">
+                        Search
+                    </button>
+                </div>
+            </div>
+
+            <!-- Table Container -->
+            <div class="panel-human overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table class="human-table">
+                        <thead>
+                            <tr>
+                                <th>Ref ID</th>
+                                <th>Applicant Name</th>
+                                <th>Location & Disaster</th>
+                                <th>Family</th>
+                                <th>Aid Requested</th>
+                                <th>Amount Req</th>
+                                <th>Sanctioned</th>
+                                <th>Status</th>
+                                <th style="text-align: right;">Officer Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="beneficiaries-tbody">
+                            <!-- Populated dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================================================================= -->
+        <!-- TAB 2: PUBLIC DISTRIBUTION LEDGER (DBT AUDIT)                    -->
+        <!-- ================================================================= -->
+        <div id="tab-ledger" class="hidden space-y-4">
+            <div class="panel-human p-4 flex flex-col sm:flex-row items-center justify-between gap-3">
+                <div>
+                    <h3 class="text-xs font-bold font-mono uppercase text-white tracking-wider">
+                        Public Direct Benefit Transfer (DBT) Ledger
+                    </h3>
+                    <p class="text-[11px] text-slate-400 font-mono">
+                        Immutable record of all relief grants released to verified disaster victims.
+                    </p>
+                </div>
+                <button type="button" class="btn btn-secondary btn-xs" onclick="alert('Exporting verified DBT transaction ledger (CSV format)...')">
+                    📥 Export Ledger (CSV)
+                </button>
+            </div>
+
+            <div class="panel-human overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table class="human-table">
+                        <thead>
+                            <tr>
+                                <th>Date / Time</th>
+                                <th>DBT Txn ID</th>
+                                <th>Beneficiary ID</th>
+                                <th>Beneficiary Name</th>
+                                <th>Location / Ward</th>
+                                <th>Relief Category</th>
+                                <th>Disbursed Amount</th>
+                                <th>Payment Mode</th>
+                                <th>Audit Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="ledger-tbody">
+                            <!-- Populated dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================================================================= -->
+        <!-- TAB 3: ALLOCATION BY CATEGORY                                    -->
+        <!-- ================================================================= -->
+        <div id="tab-categories" class="hidden space-y-4">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                
+                <div class="panel-human p-5 space-y-4">
+                    <h3 class="text-xs font-bold font-mono uppercase text-white tracking-wider border-b border-[#1a2742] pb-2">
+                        Expenditure Breakdown by Relief Category
+                    </h3>
+
+                    <div class="space-y-3 font-mono text-xs">
+                        <div>
+                            <div class="flex justify-between text-slate-300 mb-1">
+                                <span>🍲 Food Rations & Clean Water</span>
+                                <strong class="text-white">₹28,50,000 (36.2%)</strong>
+                            </div>
+                            <div class="w-full bg-[#0a1122] h-2.5 rounded overflow-hidden">
+                                <div class="bg-amber-500 h-full rounded" style="width: 36.2%;"></div>
+                            </div>
+                        </div>
+
+                        <div>
+                            <div class="flex justify-between text-slate-300 mb-1">
+                                <span>⛺ Temporary Shelter & Tarpaulins</span>
+                                <strong class="text-white">₹22,00,000 (28.0%)</strong>
+                            </div>
+                            <div class="w-full bg-[#0a1122] h-2.5 rounded overflow-hidden">
+                                <div class="bg-sky-500 h-full rounded" style="width: 28.0%;"></div>
+                            </div>
+                        </div>
+
+                        <div>
+                            <div class="flex justify-between text-slate-300 mb-1">
+                                <span>💊 Essential Medicines & Care</span>
+                                <strong class="text-white">₹14,20,000 (18.0%)</strong>
+                            </div>
+                            <div class="w-full bg-[#0a1122] h-2.5 rounded overflow-hidden">
+                                <div class="bg-rose-500 h-full rounded" style="width: 18.0%;"></div>
+                            </div>
+                        </div>
+
+                        <div>
+                            <div class="flex justify-between text-slate-300 mb-1">
+                                <span>💰 Direct Cash Grants (DBT)</span>
+                                <strong class="text-white">₹14,00,000 (17.8%)</strong>
+                            </div>
+                            <div class="w-full bg-[#0a1122] h-2.5 rounded overflow-hidden">
+                                <div class="bg-emerald-500 h-full rounded" style="width: 17.8%;"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="panel-human p-5 space-y-4">
+                    <h3 class="text-xs font-bold font-mono uppercase text-white tracking-wider border-b border-[#1a2742] pb-2">
+                        Relief Allocation Norms & Policy
+                    </h3>
+                    <div class="space-y-2.5 text-xs text-slate-300 font-sans leading-relaxed">
+                        <div class="p-3 rounded bg-[#0b1222] border border-[#1a2742]">
+                            <strong class="text-emerald-400 font-mono block text-xs">Category A: Total Dwelling Collapse</strong>
+                            Up to ₹95,000 immediate emergency housing grant + family relief kit.
+                        </div>
+                        <div class="p-3 rounded bg-[#0b1222] border border-[#1a2742]">
+                            <strong class="text-sky-400 font-mono block text-xs">Category B: Partial Inundation / Mudflow</strong>
+                            Up to ₹35,000 dwelling repair grant + ration support for 30 days.
+                        </div>
+                        <div class="p-3 rounded bg-[#0b1222] border border-[#1a2742]">
+                            <strong class="text-amber-400 font-mono block text-xs">Category C: Immediate Subsistence Assistance</strong>
+                            ₹10,000 DBT cash grant + emergency grain and medical kit.
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- ================================================================= -->
+        <!-- TAB 4: CONTRIBUTION STREAMS & INFLOWS                            -->
+        <!-- ================================================================= -->
+        <div id="tab-inflows" class="hidden space-y-4">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                
+                <div class="panel-human p-5 space-y-3">
+                    <div class="flex items-center justify-between border-b border-[#1a2742] pb-2">
+                        <h4 class="text-xs font-bold font-mono uppercase text-white">SDRF State Allocation</h4>
+                        <span class="text-xs font-mono text-emerald-400 font-bold">60%</span>
+                    </div>
+                    <div class="text-2xl font-mono font-extrabold text-white">₹75,00,000</div>
+                    <p class="text-xs text-slate-400 leading-relaxed font-sans">
+                        Sanctioned under the State Disaster Response Fund allocation for immediate relief and district contingency.
+                    </p>
+                    <div class="text-[11px] font-mono text-slate-500">Ref: SDRF-DIST-2026/04</div>
+                </div>
+
+                <div class="panel-human p-5 space-y-3">
+                    <div class="flex items-center justify-between border-b border-[#1a2742] pb-2">
+                        <h4 class="text-xs font-bold font-mono uppercase text-white">Corporate CSR Grants</h4>
+                        <span class="text-xs font-mono text-sky-400 font-bold">28%</span>
+                    </div>
+                    <div class="text-2xl font-mono font-extrabold text-white">₹35,00,000</div>
+                    <p class="text-xs text-slate-400 leading-relaxed font-sans">
+                        Targeted CSR contributions dedicated towards dry rations, water purification units, and medical supplies.
+                    </p>
+                    <div class="text-[11px] font-mono text-slate-500">3 Corporate Partners</div>
+                </div>
+
+                <div class="panel-human p-5 space-y-3">
+                    <div class="flex items-center justify-between border-b border-[#1a2742] pb-2">
+                        <h4 class="text-xs font-bold font-mono uppercase text-white">Humanitarian Public Donations</h4>
+                        <span class="text-xs font-mono text-amber-400 font-bold">12%</span>
+                    </div>
+                    <div class="text-2xl font-mono font-extrabold text-white">₹15,00,000</div>
+                    <p class="text-xs text-slate-400 leading-relaxed font-sans">
+                        Aggregated citizen contributions via unified gateway. 100% auditable on public blockchain-mirrored ledger.
+                    </p>
+                    <div class="text-[11px] font-mono text-slate-500">1,420 Verified Donors</div>
+                </div>
+
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Modal: Review & Approval Drawer -->
+    <div id="modal-review" class="hidden modal-backdrop">
+        <div class="modal-card max-w-lg w-full space-y-4">
+            <div class="flex items-center justify-between border-b border-[#1a2742] pb-2">
+                <h3 class="text-sm font-bold font-mono text-white">
+                    Officer Review: Application <span id="m-app-id" class="text-cyan-400">#RF-2026-101</span>
+                </h3>
+                <button type="button" class="text-slate-400 hover:text-white font-mono text-sm" onclick="closeReviewModal()">✕</button>
+            </div>
+
+            <div class="space-y-2 text-xs font-mono bg-[#090e1c] p-3 rounded border border-[#1a2742]">
+                <div class="flex justify-between">
+                    <span class="text-slate-400">Applicant:</span>
+                    <strong id="m-name" class="text-white">K. Balan</strong>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-slate-400">Contact:</span>
+                    <span id="m-phone" class="text-slate-300">+91 94471 22334</span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-slate-400">Location:</span>
+                    <span id="m-loc" class="text-slate-300">Ward 4, Arumparthapuram</span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-slate-400">Damage Details:</span>
+                    <span id="m-damage" class="text-amber-300 text-right max-w-xs">Ground floor submerged. Lost ration stocks.</span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-slate-400">Amount Requested:</span>
+                    <span id="m-req-amt" class="text-amber-400 font-bold">₹15,000</span>
+                </div>
+            </div>
+
+            <div class="space-y-3">
+                <div>
+                    <label for="m-sanction-amt" class="block text-xs font-mono text-slate-300 mb-1">Approved Grant Amount (₹):</label>
+                    <input type="number" id="m-sanction-amt" class="tactical-input w-full text-xs font-mono" value="15000">
+                </div>
+
+                <div>
+                    <label for="m-officer-name" class="block text-xs font-mono text-slate-300 mb-1">Reviewing Officer / Authority:</label>
+                    <input type="text" id="m-officer-name" class="tactical-input w-full text-xs font-mono" value="Revenue Inspector #04">
+                </div>
+
+                <div>
+                    <label for="m-notes" class="block text-xs font-mono text-slate-300 mb-1">Field Inspection Notes / Remarks:</label>
+                    <textarea id="m-notes" rows="2" class="tactical-input w-full text-xs font-mono">Field inspection confirmed flood inundation. Sanction authorized for immediate DBT credit.</textarea>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-2 pt-2">
+                <button type="button" class="btn btn-success flex-1" onclick="executeApprove()">
+                    ✓ Approve Grant (Sanction DBT)
+                </button>
+                <button type="button" class="btn btn-primary flex-1" onclick="executeDistribute()">
+                    💳 Mark Disbursed (Release DBT)
+                </button>
+                <button type="button" class="btn btn-secondary" onclick="closeReviewModal()">
+                    Cancel
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Dependencies -->
+    <script src="js/config.js"></script>
+    <script src="js/data/sample_data.js"></script>
+    <script src="js/services/reliefFundService.js"></script>
+    <script>
+        let currentModalBeneficiaryId = null;
+
+        function switchFundTab(tabKey) {
+            document.querySelectorAll('.funds-tab-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.getAttribute('data-tab') === tabKey);
+            });
+
+            ['applications', 'ledger', 'categories', 'inflows'].forEach(t => {
+                const el = document.getElementById(`tab-${t}`);
+                if (el) el.classList.toggle('hidden', t !== tabKey);
+            });
+        }
+
+        function updateKpis() {
+            if (typeof reliefFundService === 'undefined') return;
+            const stats = reliefFundService.getStats();
+
+            document.getElementById('kpi-collected').innerText = `₹${stats.totalCollected.toLocaleString('en-IN')}`;
+            document.getElementById('kpi-distributed').innerText = `₹${stats.totalDistributed.toLocaleString('en-IN')}`;
+            document.getElementById('kpi-remaining').innerText = `₹${stats.remainingFunds.toLocaleString('en-IN')}`;
+            document.getElementById('kpi-verified').innerText = stats.verifiedBeneficiaries;
+            document.getElementById('kpi-pending').innerText = stats.pendingRequests;
+
+            const pct = stats.totalCollected > 0 ? ((stats.totalDistributed / stats.totalCollected) * 100).toFixed(1) : 0;
+            document.getElementById('kpi-dist-pct').innerText = `${pct}% allocated`;
+        }
+
+        function renderBeneficiariesTable() {
+            if (typeof reliefFundService === 'undefined') return;
+            const statusFilter = document.getElementById('filter-status').value;
+            const searchQuery = document.getElementById('search-beneficiary').value;
+
+            const list = reliefFundService.getBeneficiaries(statusFilter, searchQuery);
+            const tbody = document.getElementById('beneficiaries-tbody');
+            if (!tbody) return;
+
+            if (list.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="9" class="p-6 text-center text-slate-400 font-mono text-xs">No beneficiary applications found matching the selected filter.</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = list.map(b => {
+                const needs = Array.isArray(b.assistanceRequired) ? b.assistanceRequired.join(', ') : b.assistanceRequired;
+                const statusBadges = {
+                    "Pending": `<span class="px-2 py-0.5 rounded text-[11px] font-mono font-bold bg-amber-950 text-amber-300 border border-amber-500/40">PENDING</span>`,
+                    "Under Verification": `<span class="px-2 py-0.5 rounded text-[11px] font-mono font-bold bg-sky-950 text-sky-300 border border-sky-500/40">VERIFYING</span>`,
+                    "Approved": `<span class="px-2 py-0.5 rounded text-[11px] font-mono font-bold bg-indigo-950 text-indigo-300 border border-indigo-500/40">APPROVED</span>`,
+                    "Distributed": `<span class="px-2 py-0.5 rounded text-[11px] font-mono font-bold bg-emerald-950 text-emerald-300 border border-emerald-500/40">DISTRIBUTED</span>`,
+                    "Rejected": `<span class="px-2 py-0.5 rounded text-[11px] font-mono font-bold bg-rose-950 text-rose-300 border border-rose-500/40">REJECTED</span>`
+                };
+
+                return `
+                    <tr>
+                        <td class="font-mono font-bold text-cyan-400">${b.id}</td>
+                        <td>
+                            <div class="font-bold text-white text-xs">${b.name}</div>
+                            <div class="text-[11px] text-slate-400 font-mono">${b.phone || '-'}</div>
+                        </td>
+                        <td>
+                            <div class="text-xs text-slate-200">${b.location}</div>
+                            <div class="text-[11px] text-slate-400 font-mono">${b.disasterType}</div>
+                        </td>
+                        <td class="font-mono text-center">${b.familySize || 1}</td>
+                        <td class="text-xs text-slate-300 max-w-xs truncate" title="${needs}">${needs}</td>
+                        <td class="font-mono text-amber-400">₹${(b.amountRequested || 0).toLocaleString('en-IN')}</td>
+                        <td class="font-mono ${b.amountApproved ? 'text-emerald-400 font-bold' : 'text-slate-500'}">
+                            ${b.amountApproved ? `₹${b.amountApproved.toLocaleString('en-IN')}` : '-'}
+                        </td>
+                        <td>${statusBadges[b.status] || b.status}</td>
+                        <td style="text-align: right;">
+                            <button type="button" class="btn btn-secondary btn-xs" onclick="openReviewModal('${b.id}')">
+                                Action ➔
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function renderLedgerTable() {
+            if (typeof reliefFundService === 'undefined') return;
+            const dists = reliefFundService.getDistributions();
+            const tbody = document.getElementById('ledger-tbody');
+            if (!tbody) return;
+
+            tbody.innerHTML = dists.map(d => `
+                <tr>
+                    <td class="font-mono text-slate-400 text-xs">${d.date}</td>
+                    <td class="font-mono font-bold text-cyan-400 text-xs">${d.txnId}</td>
+                    <td class="font-mono text-slate-300 text-xs">${d.beneficiaryId}</td>
+                    <td class="font-bold text-white text-xs">${d.beneficiaryName}</td>
+                    <td class="text-xs text-slate-300">${d.location}</td>
+                    <td class="text-xs text-emerald-400 font-mono">${d.category}</td>
+                    <td class="font-mono font-bold text-emerald-400 text-xs">₹${d.amount.toLocaleString('en-IN')}</td>
+                    <td class="font-mono text-slate-400 text-xs">${d.paymentMode}</td>
+                    <td>
+                        <span class="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-emerald-950 text-emerald-300 border border-emerald-500/40">
+                            COMPLETED
+                        </span>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function openReviewModal(bId) {
+            const b = reliefFundService.getBeneficiaryById(bId);
+            if (!b) return;
+            currentModalBeneficiaryId = b.id;
+
+            document.getElementById('m-app-id').innerText = b.id;
+            document.getElementById('m-name').innerText = b.name;
+            document.getElementById('m-phone').innerText = b.phone || '-';
+            document.getElementById('m-loc').innerText = `${b.disasterType} • ${b.location}`;
+            document.getElementById('m-damage').innerText = b.damageDetails || 'Dwelling flooded, immediate relief aid required.';
+            document.getElementById('m-req-amt').innerText = `₹${(b.amountRequested || 15000).toLocaleString('en-IN')}`;
+            document.getElementById('m-sanction-amt').value = b.amountApproved || b.amountRequested || 15000;
+
+            document.getElementById('modal-review').classList.remove('hidden');
+        }
+
+        function closeReviewModal() {
+            document.getElementById('modal-review').classList.add('hidden');
+            currentModalBeneficiaryId = null;
+        }
+
+        async function executeApprove() {
+            if (!currentModalBeneficiaryId) return;
+            const amt = parseFloat(document.getElementById('m-sanction-amt').value) || 15000;
+            const officer = document.getElementById('m-officer-name').value.trim();
+            const notes = document.getElementById('m-notes').value.trim();
+
+            reliefFundService.updateApplicationStatus(currentModalBeneficiaryId, "Approved", amt, officer, notes);
+
+            try {
+                await fetch('/api/relief/approve', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ id: currentModalBeneficiaryId, status: "Approved", amount: amt, officer, notes })
+                });
+            } catch(e) {}
+
+            closeReviewModal();
+            updateKpis();
+            renderBeneficiariesTable();
+            alert(`Application ${currentModalBeneficiaryId} marked as APPROVED with sanctioned grant of ₹${amt.toLocaleString('en-IN')}.`);
+        }
+
+        async function executeDistribute() {
+            if (!currentModalBeneficiaryId) return;
+            const amt = parseFloat(document.getElementById('m-sanction-amt').value) || 15000;
+            const officer = document.getElementById('m-officer-name').value.trim();
+            const notes = document.getElementById('m-notes').value.trim();
+
+            const updated = reliefFundService.updateApplicationStatus(currentModalBeneficiaryId, "Distributed", amt, officer, notes);
+
+            try {
+                await fetch('/api/relief/approve', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ id: currentModalBeneficiaryId, status: "Distributed", amount: amt, officer, notes })
+                });
+            } catch(e) {}
+
+            closeReviewModal();
+            updateKpis();
+            renderBeneficiariesTable();
+            renderLedgerTable();
+            alert(`Direct Benefit Transfer released for ${currentModalBeneficiaryId}!\nTransaction ID: ${updated?.txnId || 'TXN-RF-90000'}\nAmount: ₹${amt.toLocaleString('en-IN')}`);
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            updateKpis();
+            renderBeneficiariesTable();
+            renderLedgerTable();
+        });
+    </script>
+</body>
+</html>

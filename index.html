@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI-DRIS — Disaster Rescue Centre AI Command Dashboard</title>
+
+    <!-- Leaflet CSS: Bundled Local + CDN Fallback -->
+    <link rel="stylesheet" href="css/leaflet.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="">
+
+    <!-- Tailwind CSS (for utility classes) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        critical: '#ef4444',
+                        high: '#f97316',
+                        medium: '#eab308',
+                        low: '#22c55e',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- Custom Tactical Command Center Stylesheet -->
+    <link rel="stylesheet" href="css/styles.css?v=2.5">
+</head>
+<body class="bg-[#0f172a] text-slate-100 antialiased selection:bg-sky-500 selection:text-white" style="background-color: #0f172a !important;">
+
+    <!-- Top Command Center Navigation Bar -->
+    <header class="app-header flex items-center justify-between" style="background-color: #111d38 !important; border-bottom: 1px solid #1e2f4f !important;">
+        <div class="flex items-center gap-3">
+            <!-- Mobile Sidebar Hamburger Toggle -->
+            <button id="btn-mobile-menu" class="md:hidden text-slate-300 hover:text-white text-lg p-1" title="Toggle Command Menu">
+                ☰
+            </button>
+
+            <div class="w-9 h-9 rounded bg-rose-600/20 border border-rose-500/50 flex items-center justify-center text-xl">
+                🚑
+            </div>
+            <div>
+                <div class="flex items-center gap-2">
+                    <h1 class="text-sm md:text-base font-extrabold font-mono tracking-wider text-cyan-400" style="color: #00f0ff !important;">
+                        AI-DRIS COMMAND CENTRE
+                    </h1>
+                    <span class="hidden sm:inline-block text-[10px] font-mono uppercase bg-slate-800 text-sky-400 px-2 py-0.5 rounded border border-slate-700">
+                        DECISION SUPPORT & RESCUE ROUTING
+                    </span>
+                </div>
+                <p class="text-[11px] text-slate-400 font-mono hidden md:block">
+                    Offline Android Phone Mesh • Real-Time Ingestion Gateway • SIH Defense Edition
+                </p>
+            </div>
+        </div>
+
+        <div class="flex items-center gap-2 sm:gap-3">
+            <!-- Server / Standalone Badge -->
+            <div id="backend-status-badge" class="hidden sm:flex text-[11px] font-mono text-cyan-400 items-center gap-1.5 px-2 py-0.5 rounded bg-cyan-950/60 border border-cyan-500/30">
+                <span class="w-2 h-2 rounded-full bg-cyan-400 inline-block"></span> MESH ACTIVE
+            </div>
+
+            <!-- Live Digital Tactical Clock -->
+            <div id="live-clock" class="text-xs font-mono bg-slate-900/90 px-2.5 py-1 rounded border border-slate-800 hidden lg:block">
+                --:--:--
+            </div>
+
+            <!-- Sound Alert Toggle -->
+            <button id="btn-audio-toggle" class="btn btn-secondary btn-xs text-emerald-400">
+                🔔 Sound: ON
+            </button>
+
+            <!-- Portals Links -->
+            <a href="funds.html" target="_blank" class="btn btn-secondary btn-xs text-sky-300 border-[#1a2742] hidden xl:flex items-center gap-1.5" title="Disaster Relief Fund Management & Transparency Dashboard">
+                <span>💼</span> <span>Manage Funds</span>
+            </a>
+            <a href="relief.html" target="_blank" class="btn btn-secondary btn-xs text-emerald-300 border-[#1a2742] hidden xl:flex items-center gap-1.5" title="Citizen Disaster Relief Assistance Application">
+                <span>🤝</span> <span>Relief Aid</span>
+            </a>
+            <a href="sos.html" target="_blank" class="btn btn-secondary btn-xs text-rose-300 border-[#1a2742] hidden lg:flex items-center gap-1.5" title="Citizen Emergency SOS Portal">
+                <span>🚨</span> <span>Victim SOS</span>
+            </a>
+            <a href="report.html" target="_blank" class="btn btn-secondary btn-xs text-amber-300 border-[#1a2742] hidden lg:flex items-center gap-1.5" title="Citizen Community Incident Reporting">
+                <span>📢</span> <span>Report Hazard</span>
+            </a>
+
+            <!-- Analytics Button -->
+            <button id="btn-analytics" class="btn btn-secondary btn-xs flex items-center gap-1">
+                <span>📊</span>
+                <span class="hidden sm:inline">Analytics</span>
+            </button>
+
+            <!-- Reset Demo Button -->
+            <button id="btn-reset-demo" class="btn btn-secondary btn-xs hidden md:flex items-center gap-1" title="Reset to default demo data">
+                <span>🔄</span>
+                <span>Reset</span>
+            </button>
+
+            <!-- Simulate Incoming Mesh SOS Button -->
+            <button id="btn-simulate-sos" class="btn btn-primary btn-xs sm:btn-sm flex items-center gap-1.5">
+                <span class="animate-pulse">📡</span>
+                <span>Simulate SOS</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- Top Statistics Ticker Bar (Upgraded with all 8 SIH Required Metrics) -->
+    <section class="stats-ticker-bar flex flex-wrap items-center justify-between px-4 py-2 bg-[#090e1c] border-b border-slate-800 text-xs font-mono">
+        <div class="flex items-center gap-4 sm:gap-6 flex-wrap">
+            <!-- 1. Active Emergencies -->
+            <div class="flex items-center gap-1.5" title="Active uncompleted emergencies">
+                <span class="pulse-dot"></span>
+                <span class="text-slate-400 uppercase text-[11px] font-bold">Active Emergencies:</span>
+                <span class="text-red-400 font-extrabold text-sm" id="stat-active-emergencies">0</span>
+            </div>
+
+            <!-- 2. High Priority Cases -->
+            <div class="flex items-center gap-1.5" title="Critical and High priority alerts">
+                <span class="w-2 h-2 rounded-full bg-orange-500 inline-block"></span>
+                <span class="text-slate-400 uppercase text-[11px] font-bold">High Priority:</span>
+                <span class="text-orange-400 font-extrabold text-sm" id="stat-high-priority">0</span>
+            </div>
+
+            <!-- 3. Resolved Cases -->
+            <div class="flex items-center gap-1.5" title="Successfully rescued and resolved cases">
+                <span class="w-2 h-2 rounded-full bg-emerald-500 inline-block"></span>
+                <span class="text-slate-400 uppercase text-[11px] font-bold">Resolved Cases:</span>
+                <span class="text-emerald-400 font-extrabold text-sm" id="stat-resolved-cases">0</span>
+            </div>
+
+            <!-- 4. People at Risk -->
+            <div class="flex items-center gap-1.5" title="Total individuals reported in danger">
+                <span>👥</span>
+                <span class="text-slate-400 uppercase text-[11px] font-bold">People at Risk:</span>
+                <span class="text-cyan-400 font-extrabold text-sm" id="stat-people-at-risk">0</span>
+            </div>
+        </div>
+
+        <div class="flex items-center gap-4 sm:gap-6 flex-wrap mt-1 sm:mt-0">
+            <!-- 5. Ambulances Available -->
+            <div class="flex items-center gap-1.5" title="Active emergency ambulances on standby">
+                <span>🚑</span>
+                <span class="text-slate-400 uppercase text-[11px] font-bold">Ambulances:</span>
+                <span class="text-emerald-400 font-extrabold text-sm" id="stat-ambulances">6</span>
+            </div>
+
+            <!-- 6. Rescue Teams Available -->
+            <div class="flex items-center gap-1.5" title="Available rescue personnel units">
+                <span>👨‍🚒</span>
+                <span class="text-slate-400 uppercase text-[11px] font-bold">Rescue Teams:</span>
+                <span class="text-sky-400 font-extrabold text-sm" id="stat-rescue-teams">3</span>
+            </div>
+
+            <!-- 7. Hospital Available Beds -->
+            <div class="flex items-center gap-1.5" title="Total available emergency & ICU hospital beds">
+                <span>🏥</span>
+                <span class="text-slate-400 uppercase text-[11px] font-bold">Hospital Beds:</span>
+                <span class="text-purple-400 font-extrabold text-sm" id="stat-hospital-beds">24</span>
+            </div>
+
+            <!-- 8. Network / Mesh Status -->
+            <div class="flex items-center gap-1.5" title="Communication infrastructure status">
+                <span>📡</span>
+                <span class="text-slate-400 uppercase text-[11px] font-bold">Network:</span>
+                <span id="stat-network-status" class="text-emerald-400 font-extrabold text-xs font-mono">
+                    <span class="w-2 h-2 rounded-full bg-emerald-400 inline-block animate-pulse"></span> MESH ACTIVE
+                </span>
+            </div>
+        </div>
+    </section>
+
+    <!-- Main Layout: Command Sidebar + Dynamic Content Container -->
+    <div class="app-layout">
+        
+        <!-- Collapsible Tactical Sidebar -->
+        <div id="command-sidebar-container">
+            <!-- Rendered dynamically by SidebarNav -->
+        </div>
+
+        <!-- Main Content Area -->
+        <div class="flex-1 flex flex-col min-w-0 bg-[#0f172a] overflow-hidden" style="background-color: #0f172a !important;">
+            
+            <!-- VIEW 1: Main Tactical Dashboard (The existing dashboard grid: Map on Left, Alert Queue on Right) -->
+            <div id="view-dashboard" class="dashboard-grid">
+                <!-- Left Column: Tactical Map & AI Situation Summary -->
+                <section class="map-view-column">
+                    <!-- Floating Map Action Controls -->
+                    <div class="map-floating-controls">
+                        <button id="btn-fit-map" class="btn btn-secondary btn-xs bg-slate-900/90 backdrop-blur shadow" title="Zoom to fit all incidents">
+                            🎯 Fit Incidents
+                        </button>
+                        <div class="text-[11px] font-mono bg-slate-900/90 text-slate-300 border border-slate-700 px-2 py-1 rounded flex items-center gap-1.5 backdrop-blur">
+                            <span class="w-2 h-2 rounded-full bg-red-500 inline-block animate-ping"></span>
+                            <span>LIVE SATELLITE & MESH CARTOGRAPHY</span>
+                        </div>
+                    </div>
+
+                    <!-- Leaflet Interactive Map -->
+                    <div id="sos-map"></div>
+
+                    <!-- AI Situation Summary Widget (Docked at bottom of map) -->
+                    <div id="ai-summary-container" class="p-3 bg-[#080d1a] border-t border-slate-800">
+                        <!-- AI summary rendered dynamically -->
+                    </div>
+                </section>
+
+                <!-- Right Column: Priority SOS Alert Operations Panel -->
+                <section class="alert-panel-column">
+                    <!-- Search & Multi-Filter Header -->
+                    <div class="panel-filter-bar">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center gap-2">
+                                <span class="text-xs font-mono font-bold uppercase text-white flex items-center gap-1.5">
+                                    <span class="pulse-dot"></span>
+                                    Priority Queue
+                                </span>
+                                <span class="text-[11px] text-slate-400 font-mono">Critical First</span>
+                            </div>
+                            <button class="text-xs text-sky-400 hover:underline font-mono" onclick="alertPanel.resetFilters()">
+                                Clear Filters
+                            </button>
+                        </div>
+
+                        <!-- Instant Search Input -->
+                        <div class="relative">
+                            <input type="text" id="search-input" class="tactical-input w-full text-xs pl-7" placeholder="Search SOS ID, message, location, disaster...">
+                            <span class="absolute left-2.5 top-2 text-slate-400 text-xs">🔍</span>
+                        </div>
+
+                        <!-- Filter Dropdowns Grid -->
+                        <div class="grid grid-cols-3 gap-1.5 text-xs">
+                            <div>
+                                <select id="filter-disaster" class="tactical-select w-full text-[11px]">
+                                    <option value="ALL">Disaster: ALL</option>
+                                    <option value="Flood">🌊 Flood</option>
+                                    <option value="Fire">🔥 Fire</option>
+                                    <option value="Earthquake">🌎 Earthquake</option>
+                                    <option value="Cyclone">🌪️ Cyclone</option>
+                                    <option value="Landslide">⛰️ Landslide</option>
+                                    <option value="Building Collapse">🏚️ Collapse</option>
+                                    <option value="Tsunami">🌊 Tsunami</option>
+                                    <option value="Bridge Damage">🌉 Bridge</option>
+                                    <option value="Road Blockage">🚧 Road</option>
+                                    <option value="Other">⚠️ Other</option>
+                                </select>
+                            </div>
+
+                            <div>
+                                <select id="filter-priority" class="tactical-select w-full text-[11px]">
+                                    <option value="ALL">Priority: ALL</option>
+                                    <option value="CRITICAL">🔴 Critical</option>
+                                    <option value="HIGH">🟠 High</option>
+                                    <option value="MEDIUM">🟡 Medium</option>
+                                    <option value="LOW">🟢 Low</option>
+                                </select>
+                            </div>
+
+                            <div>
+                                <select id="filter-status" class="tactical-select w-full text-[11px]">
+                                    <option value="ALL">Status: ALL</option>
+                                    <option value="NEW">New</option>
+                                    <option value="AI ANALYZED">AI Analyzed</option>
+                                    <option value="OFFICER VERIFIED">Verified</option>
+                                    <option value="ASSIGNED">Assigned</option>
+                                    <option value="RESCUE IN PROGRESS">In Progress</option>
+                                    <option value="RESOLVED">Resolved</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Priority Sorted SOS Alert Card List -->
+                    <div id="sos-alert-list" class="alert-list-container">
+                        <!-- Rendered dynamically by AlertPanel -->
+                    </div>
+                </section>
+            </div>
+
+            <!-- VIEW 2: Dedicated Emergency Feed View -->
+            <div id="view-feed" class="hidden overflow-y-auto flex-1"></div>
+
+            <!-- VIEW: AlertShield - Fake Emergency Alert Detection -->
+            <div id="view-alertshield" class="hidden overflow-y-auto flex-1"></div>
+
+            <!-- VIEW: BhashaAlert - Multilingual Emergency Translation & Voice -->
+            <div id="view-bhashaalert" class="hidden overflow-y-auto flex-1"></div>
+
+            <!-- VIEW: ReliefFund - Disaster Relief Financial Assistance & Ledger -->
+            <div id="view-relieffund" class="hidden overflow-y-auto flex-1"></div>
+
+            <!-- VIEW: Volunteer Management -->
+            <div id="view-volunteers" class="hidden overflow-y-auto flex-1"></div>
+
+            <!-- VIEW: Relief Camps & Shelter Logistics -->
+            <div id="view-camps" class="hidden overflow-y-auto flex-1"></div>
+
+            <!-- VIEW: Unified Admin Dashboard & Approval Console -->
+            <div id="view-admin" class="hidden overflow-y-auto flex-1"></div>
+
+            <!-- VIEW 3: AI Analysis Hub -->
+            <div id="view-ai-hub" class="hidden overflow-y-auto flex-1"></div>
+
+            <!-- VIEW 4: Rescue Teams View -->
+            <div id="view-teams" class="hidden overflow-y-auto flex-1"></div>
+
+            <!-- VIEW 5: Live Map View (Reserved container) -->
+            <div id="view-map" class="hidden overflow-y-auto flex-1"></div>
+
+            <!-- VIEW 6: Hospitals View -->
+            <div id="view-hospitals" class="hidden overflow-y-auto flex-1"></div>
+
+            <!-- VIEW 7: Incidents View -->
+            <div id="view-incidents" class="hidden overflow-y-auto flex-1"></div>
+
+            <!-- VIEW 8: Incident History View -->
+            <div id="view-history" class="hidden overflow-y-auto flex-1"></div>
+
+            <!-- VIEW 9: Network Status View -->
+            <div id="view-network" class="hidden overflow-y-auto flex-1"></div>
+
+            <!-- VIEW 10: Settings View -->
+            <div id="view-settings" class="hidden overflow-y-auto flex-1"></div>
+        </div>
+    </div>
+
+    <!-- Deep Inspection & Decision Support Modal -->
+    <div id="detail-modal" class="hidden">
+        <!-- Rendered dynamically by DetailModal -->
+    </div>
+
+    <!-- Mesh Simulator Modal -->
+    <div id="simulator-modal" class="hidden">
+        <!-- Rendered dynamically by MeshSimulator -->
+    </div>
+
+    <!-- Analytics & Telemetry Modal -->
+    <div id="analytics-modal" class="hidden">
+        <!-- Rendered dynamically by AnalyticsModal -->
+    </div>
+
+    <!-- Scripts (Ordered by dependency) -->
+    <script src="js/leaflet.js"></script>
+    <script>
+        if (typeof L === 'undefined') {
+            document.write('<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"><\/script>');
+        }
+    </script>
+    <script src="js/config.js"></script>
+    <script src="js/data/sample_data.js"></script>
+    <script src="js/services/aiAnalysisService.js"></script>
+    <script src="js/services/hospitalService.js"></script>
+    <script src="js/services/routingService.js"></script>
+    <script src="js/services/disasterZoneService.js"></script>
+    <script src="js/services/rescueTeamService.js"></script>
+    <script src="js/services/translationService.js"></script>
+    <script src="js/services/sosService.js"></script>
+    <script src="js/services/reliefFundService.js"></script>
+    <script src="js/services/alertShieldService.js"></script>
+    <script src="js/services/bhashaAlertService.js"></script>
+    <script src="js/components/mapManager.js"></script>
+    <script src="js/components/alertPanel.js"></script>
+    <script src="js/components/detailModal.js"></script>
+    <script src="js/components/aiSummaryWidget.js"></script>
+    <script src="js/components/meshSimulator.js"></script>
+    <script src="js/components/analyticsModal.js"></script>
+    <script src="js/components/reliefFundView.js"></script>
+    <script src="js/components/alertShieldView.js"></script>
+    <script src="js/components/bhashaAlertView.js"></script>
+    <script src="js/components/reliefCampsView.js"></script>
+    <script src="js/components/volunteersView.js"></script>
+    <script src="js/components/adminDashboardView.js"></script>
+    <script src="js/components/sidebarNav.js"></script>
+    <script src="js/components/emergencyFeedView.js"></script>
+    <script src="js/components/sihDemoBar.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>

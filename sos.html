@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Emergency SOS Distress Portal — AI-DRIS</title>
+
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="css/styles.css">
+
+    <style>
+        body {
+            background-color: #080c17;
+            color: #f8fafc;
+            touch-action: manipulation;
+        }
+        .disaster-select-btn {
+            background: #0d1526;
+            border: 1px solid #1a2742;
+            border-radius: 6px;
+            padding: 0.85rem 0.5rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 0.35rem;
+            cursor: pointer;
+            transition: all 0.15s ease-in-out;
+            font-family: var(--font-mono);
+        }
+        .disaster-select-btn:hover {
+            border-color: #0284c7;
+            background: #121e36;
+        }
+        .disaster-select-btn.selected {
+            border-color: #e11d48;
+            background: rgba(225, 29, 72, 0.15);
+            color: #ffffff;
+        }
+        .btn-toggle-choice {
+            padding: 0.75rem 1.25rem;
+            border-radius: 6px;
+            font-family: var(--font-mono);
+            font-size: 0.95rem;
+            font-weight: 700;
+            border: 1px solid #1a2742;
+            background: #0d1526;
+            color: #cbd5e1;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+        .btn-toggle-choice.selected-yes {
+            background: rgba(225, 29, 72, 0.2);
+            border-color: #e11d48;
+            color: #ffffff;
+        }
+        .btn-toggle-choice.selected-no {
+            background: rgba(5, 150, 105, 0.2);
+            border-color: #059669;
+            color: #ffffff;
+        }
+    </style>
+</head>
+<body class="antialiased min-h-screen flex flex-col justify-between selection:bg-rose-600 selection:text-white pb-12">
+
+    <!-- Emergency Public Header -->
+    <header class="p-3 bg-[#0d1526] border-b border-[#1a2742] sticky top-0 z-50">
+        <div class="max-w-2xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2.5">
+            <div class="flex items-center gap-2">
+                <span class="w-2.5 h-2.5 rounded-full bg-rose-500"></span>
+                <span class="font-mono font-bold text-xs sm:text-sm tracking-wider text-white" data-i18n="portal_title">
+                    AI-DRIS • CITIZEN EMERGENCY SOS
+                </span>
+            </div>
+
+            <!-- Language Switcher Pill Buttons (Strictly NO Kannada: en, ml, ta, hi) -->
+            <div class="flex items-center gap-1.5 flex-wrap justify-center">
+                <span class="text-[11px] font-mono text-slate-400 mr-1 hidden sm:inline" data-i18n="lang_label">Language:</span>
+                <button type="button" class="lang-pill-btn active" data-lang="en" onclick="setLanguage('en')">English</button>
+                <button type="button" class="lang-pill-btn" data-lang="ml" onclick="setLanguage('ml')">മലയാളം</button>
+                <button type="button" class="lang-pill-btn" data-lang="ta" onclick="setLanguage('ta')">தமிழ்</button>
+                <button type="button" class="lang-pill-btn" data-lang="hi" onclick="setLanguage('hi')">हिंदी</button>
+                <a href="index.html" class="text-xs font-mono text-slate-400 hover:text-white ml-2 underline hidden md:inline" data-i18n="command_link">
+                    Command Centre ↗
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Citizen Content Area -->
+    <main class="max-w-xl mx-auto w-full px-4 py-5 space-y-4 flex-1">
+
+        <!-- Humanitarian Relief Announcement Banner -->
+        <div class="p-3 bg-[#0d1526] border border-[#1a2742] rounded-md text-xs font-mono flex items-center justify-between gap-2">
+            <div class="flex items-center gap-2 text-slate-300">
+                <span class="text-emerald-400">🤝</span>
+                <span data-i18n="relief_banner_msg">Need disaster food rations, temporary shelter, or financial grant?</span>
+            </div>
+            <a href="relief.html" class="text-emerald-400 hover:text-emerald-300 font-bold underline whitespace-nowrap" data-i18n="relief_banner_link">
+                Relief Assistance ➔
+            </a>
+        </div>
+
+        <!-- ================================================================= -->
+        <!-- SOS DISTRESS FORM                                                 -->
+        <!-- ================================================================= -->
+        <div id="section-sos-container" class="space-y-4">
+
+            <!-- Title & Alert Subheading -->
+            <div class="text-center space-y-1 py-1">
+                <h1 class="text-xl md:text-2xl font-bold font-mono tracking-tight text-white flex items-center justify-center gap-2">
+                    <span class="text-rose-500">🚨</span>
+                    <span data-i18n="sos_heading">EMERGENCY SOS DISTRESS CALL</span>
+                </h1>
+                <p class="text-xs text-slate-400 font-mono" data-i18n="sos_subtitle">
+                    Monitored live by District Disaster Response Control. Fill in details and send distress beacon.
+                </p>
+            </div>
+
+            <!-- STEP 1: What is happening? -->
+            <div class="panel-human p-4 space-y-3">
+                <div class="flex items-center gap-2 border-b border-[#1a2742] pb-2">
+                    <span class="w-5 h-5 rounded bg-rose-950 text-rose-400 font-mono font-bold text-xs flex items-center justify-center border border-rose-500/40">1</span>
+                    <h2 class="text-xs font-bold font-mono uppercase text-white tracking-wide" data-i18n="step1_title">
+                        What is happening?
+                    </h2>
+                </div>
+
+                <div class="grid grid-cols-3 sm:grid-cols-4 gap-2" id="disaster-type-grid">
+                    <button type="button" class="disaster-select-btn selected" data-type="Flood">
+                        <span class="text-2xl">🌊</span>
+                        <span class="text-xs font-mono font-bold text-white" data-i18n="disaster_flood">Flood</span>
+                    </button>
+                    <button type="button" class="disaster-select-btn" data-type="Fire">
+                        <span class="text-2xl">🔥</span>
+                        <span class="text-xs font-mono font-bold text-white" data-i18n="disaster_fire">Fire</span>
+                    </button>
+                    <button type="button" class="disaster-select-btn" data-type="Cyclone">
+                        <span class="text-2xl">🌪️</span>
+                        <span class="text-xs font-mono font-bold text-white" data-i18n="disaster_cyclone">Cyclone</span>
+                    </button>
+                    <button type="button" class="disaster-select-btn" data-type="Building Collapse">
+                        <span class="text-2xl">🏚️</span>
+                        <span class="text-xs font-mono font-bold text-white" data-i18n="disaster_collapse">Collapse</span>
+                    </button>
+                    <button type="button" class="disaster-select-btn" data-type="Earthquake">
+                        <span class="text-2xl">🌍</span>
+                        <span class="text-xs font-mono font-bold text-white" data-i18n="disaster_earthquake">Earthquake</span>
+                    </button>
+                    <button type="button" class="disaster-select-btn" data-type="Landslide">
+                        <span class="text-2xl">⛰️</span>
+                        <span class="text-xs font-mono font-bold text-white" data-i18n="disaster_landslide">Landslide</span>
+                    </button>
+                    <button type="button" class="disaster-select-btn" data-type="Other">
+                        <span class="text-2xl">⚡</span>
+                        <span class="text-xs font-mono font-bold text-white" data-i18n="disaster_other">Other</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- STEP 2: People needing help -->
+            <div class="panel-human p-4 space-y-3">
+                <div class="flex items-center gap-2 border-b border-[#1a2742] pb-2">
+                    <span class="w-5 h-5 rounded bg-rose-950 text-rose-400 font-mono font-bold text-xs flex items-center justify-center border border-rose-500/40">2</span>
+                    <h2 class="text-xs font-bold font-mono uppercase text-white tracking-wide" data-i18n="step2_title">
+                        People needing help
+                    </h2>
+                </div>
+
+                <div class="flex items-center justify-between p-2.5 bg-[#0a1122] rounded border border-[#1a2742]">
+                    <span class="text-xs font-mono text-slate-300" data-i18n="step2_label">Estimated people trapped / needing rescue:</span>
+                    <div class="flex items-center gap-2.5">
+                        <button type="button" id="btn-dec-people" class="w-9 h-9 rounded bg-[#101b30] border border-[#1a2742] text-xl font-bold hover:bg-[#15233e] text-white">
+                            −
+                        </button>
+                        <span id="display-people-count" class="text-2xl font-bold font-mono text-cyan-400 w-8 text-center">4</span>
+                        <button type="button" id="btn-inc-people" class="w-9 h-9 rounded bg-[#101b30] border border-[#1a2742] text-xl font-bold hover:bg-[#15233e] text-white">
+                            +
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- STEP 3 & 4: Medical Emergency & Vulnerable -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div class="panel-human p-4 space-y-2.5">
+                    <div class="flex items-center gap-2 border-b border-[#1a2742] pb-1.5">
+                        <span class="w-5 h-5 rounded bg-rose-950 text-rose-400 font-mono font-bold text-xs flex items-center justify-center border border-rose-500/40">3</span>
+                        <h2 class="text-xs font-bold font-mono uppercase text-white tracking-wide" data-i18n="step3_title">
+                            Medical Emergency
+                        </h2>
+                    </div>
+                    <p class="text-[11px] text-slate-400 font-mono" data-i18n="step3_desc">Are there injured people?</p>
+                    <div class="grid grid-cols-2 gap-2">
+                        <button type="button" id="btn-injured-yes" class="btn-toggle-choice selected-yes" onclick="setMedicalChoice(true)">
+                            <span data-i18n="yes_injured">🩺 YES</span>
+                        </button>
+                        <button type="button" id="btn-injured-no" class="btn-toggle-choice" onclick="setMedicalChoice(false)">
+                            <span data-i18n="no">NO</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="panel-human p-4 space-y-2.5">
+                    <div class="flex items-center gap-2 border-b border-[#1a2742] pb-1.5">
+                        <span class="w-5 h-5 rounded bg-rose-950 text-rose-400 font-mono font-bold text-xs flex items-center justify-center border border-rose-500/40">4</span>
+                        <h2 class="text-xs font-bold font-mono uppercase text-white tracking-wide" data-i18n="step4_title">
+                            Vulnerable People
+                        </h2>
+                    </div>
+                    <p class="text-[11px] text-slate-400 font-mono" data-i18n="step4_desc">Elderly, children, infants, disabled?</p>
+                    <div class="grid grid-cols-2 gap-2">
+                        <button type="button" id="btn-vulnerable-yes" class="btn-toggle-choice selected-yes" onclick="setVulnerableChoice(true)">
+                            <span data-i18n="yes_vulnerable">⚠️ YES</span>
+                        </button>
+                        <button type="button" id="btn-vulnerable-no" class="btn-toggle-choice" onclick="setVulnerableChoice(false)">
+                            <span data-i18n="no">NO</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- STEP 5: Multilingual Emergency Message -->
+            <div class="panel-human p-4 space-y-3">
+                <div class="flex items-center justify-between flex-wrap gap-2 border-b border-[#1a2742] pb-2">
+                    <div class="flex items-center gap-2">
+                        <span class="w-5 h-5 rounded bg-rose-950 text-rose-400 font-mono font-bold text-xs flex items-center justify-center border border-rose-500/40">5</span>
+                        <h2 class="text-xs font-bold font-mono uppercase text-white tracking-wide" data-i18n="step5_title">
+                            Describe What Is Happening
+                        </h2>
+                    </div>
+                    <!-- Live Language Detection Pill -->
+                    <div id="detected-lang-pill" class="text-[11px] font-mono bg-[#0a1122] text-sky-400 px-2.5 py-0.5 rounded border border-[#1a2742] flex items-center gap-1.5">
+                        <span class="w-1.5 h-1.5 rounded-full bg-sky-400"></span>
+                        <span id="detected-lang-name">Language: Auto-Detect</span>
+                    </div>
+                </div>
+
+                <!-- Textarea -->
+                <div>
+                    <textarea id="sos-message-text" rows="3" class="tactical-input w-full text-xs leading-relaxed" 
+                              data-i18n-placeholder="sos_placeholder"
+                              placeholder="Type directly in Malayalam, Tamil, Hindi, English, or your preferred language..."
+                              oninput="onMessageInput(this.value)">വെള്ളപ്പൊക്കം കാരണം ഞങ്ങൾ വീടിനുള്ളിൽ കുടുങ്ങിയിരിക്കുകയാണ്. 4 പേർ കുടുങ്ങിക്കിടക്കുന്നു, മുത്തശ്ശിക്ക് പരിക്കേറ്റു.</textarea>
+                    <div class="flex items-center justify-between text-[11px] font-mono text-slate-400 mt-1 flex-wrap gap-1">
+                        <span data-i18n="verbatim_notice">✓ Transmitted directly in your mother tongue without forced translation</span>
+                        <span id="script-indicator" class="text-emerald-400 font-bold">Language: Malayalam</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- STEP 6: Citizen Contact Details -->
+            <div class="panel-human p-4 space-y-3">
+                <div class="flex items-center gap-2 border-b border-[#1a2742] pb-2">
+                    <span class="w-5 h-5 rounded bg-rose-950 text-rose-400 font-mono font-bold text-xs flex items-center justify-center border border-rose-500/40">6</span>
+                    <h2 class="text-xs font-bold font-mono uppercase text-white tracking-wide" data-i18n="step6_title">
+                        Citizen Contact Information
+                    </h2>
+                </div>
+                <p class="text-[11px] text-slate-400 font-mono" data-i18n="step6_desc">
+                    Rescue commanders will contact you directly to confirm evacuation coordinates.
+                </p>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                        <label for="sos-contact-name" class="block text-xs font-mono text-slate-300 mb-1" data-i18n="contact_name_label">Your Full Name:</label>
+                        <input type="text" id="sos-contact-name" class="tactical-input w-full text-xs font-mono" placeholder="e.g. Manoj Varma" value="Manoj Varma">
+                    </div>
+                    <div>
+                        <label for="sos-contact-phone" class="block text-xs font-mono text-slate-300 mb-1" data-i18n="contact_phone_label">Mobile / WhatsApp Number:</label>
+                        <input type="tel" id="sos-contact-phone" class="tactical-input w-full text-xs font-mono" placeholder="e.g. +91 94471 88231" value="+91 94471 88231">
+                    </div>
+                </div>
+            </div>
+
+            <!-- STEP 7: Voice Message Recorder -->
+            <div class="panel-human p-4 space-y-3">
+                <div class="flex items-center gap-2 border-b border-[#1a2742] pb-2">
+                    <span class="w-5 h-5 rounded bg-rose-950 text-rose-400 font-mono font-bold text-xs flex items-center justify-center border border-rose-500/40">7</span>
+                    <h2 class="text-xs font-bold font-mono uppercase text-white tracking-wide" data-i18n="step7_title">
+                        Voice Message (Optional)
+                    </h2>
+                </div>
+
+                <div class="p-2.5 bg-[#0a1122] rounded border border-[#1a2742] flex flex-col sm:flex-row items-center justify-between gap-3">
+                    <div class="flex items-center gap-3">
+                        <button type="button" id="btn-record-voice" class="w-10 h-10 rounded-full bg-rose-600 hover:bg-rose-500 text-white flex items-center justify-center text-lg">
+                            🎤
+                        </button>
+                        <div>
+                            <div id="voice-record-label" class="text-xs font-bold text-white font-mono" data-i18n="voice_ready">
+                                HOLD OR CLICK TO RECORD VOICE
+                            </div>
+                            <div id="voice-timer-display" class="text-[11px] text-slate-400 font-mono">
+                                00:08 (Recorded)
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center gap-2">
+                        <button type="button" id="btn-play-voice" class="btn btn-secondary btn-xs" onclick="playVoicePreview()" data-i18n="voice_play">
+                            ▶ PLAY
+                        </button>
+                        <button type="button" id="btn-stop-voice" class="btn btn-secondary btn-xs hidden" onclick="stopVoiceRecording()">
+                            ■ STOP
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- STEP 8: Location Detection -->
+            <div class="panel-human p-4 space-y-2">
+                <div class="flex items-center justify-between border-b border-[#1a2742] pb-2">
+                    <div class="flex items-center gap-2">
+                        <span class="w-5 h-5 rounded bg-rose-950 text-rose-400 font-mono font-bold text-xs flex items-center justify-center border border-rose-500/40">8</span>
+                        <h2 class="text-xs font-bold font-mono uppercase text-white tracking-wide" data-i18n="step8_title">
+                            Location Detected
+                        </h2>
+                    </div>
+                    <button type="button" class="btn btn-secondary btn-xs font-mono" onclick="refreshLocation()" data-i18n="refresh_loc">
+                        📍 Refresh GPS
+                    </button>
+                </div>
+
+                <div class="p-2.5 bg-[#0a1122] rounded border border-[#1a2742] text-xs font-mono space-y-1">
+                    <div class="flex justify-between">
+                        <span class="text-slate-400" data-i18n="loc_coords">Coordinates:</span>
+                        <span id="loc-coords" class="text-cyan-400 font-bold">11.9139° N, 79.8145° E</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-slate-400" data-i18n="loc_sector">Sector / Area:</span>
+                        <span id="loc-address" class="text-white">Riverfront Basin (DEMO LOCATION)</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-slate-400" data-i18n="loc_accuracy">GPS Accuracy:</span>
+                        <span class="text-emerald-400">± 5 meters</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- FINAL SEND SOS BUTTON -->
+            <button type="button" id="btn-submit-sos" class="btn btn-danger w-full py-3.5 text-base font-bold tracking-wider">
+                <span>🔴</span>
+                <span data-i18n="btn_send_sos">SEND EMERGENCY SOS</span>
+            </button>
+        </div>
+
+        <!-- SOS Confirmation View (Shown after submission) -->
+        <div id="sos-confirmation-view" class="hidden space-y-4">
+            <div class="panel-human p-6 text-center space-y-4 border-l-4 border-l-emerald-500">
+                <div class="w-12 h-12 rounded-full bg-emerald-950 text-emerald-400 border border-emerald-500 flex items-center justify-center text-2xl mx-auto">
+                    ✓
+                </div>
+
+                <div class="space-y-1">
+                    <h2 class="text-xl font-bold font-mono text-white tracking-wide" data-i18n="sos_sent_title">
+                        ✅ SOS SENT TO COMMAND CENTRE
+                    </h2>
+                    <p class="text-xs text-slate-300 font-mono" data-i18n="sos_sent_desc">
+                        Your emergency report has been received in your native language.
+                    </p>
+                </div>
+
+                <div class="space-y-2 text-xs font-mono bg-[#0a1122] p-4 rounded text-left border border-[#1a2742]">
+                    <div class="flex justify-between py-1 border-b border-[#141f36]">
+                        <span class="text-slate-400">SOS ID:</span>
+                        <strong id="confirm-id" class="text-cyan-400 text-sm">#RQ1042</strong>
+                    </div>
+                    <div class="flex justify-between py-1 border-b border-[#141f36]">
+                        <span class="text-slate-400" data-i18n="confirm_contact">Citizen Contact:</span>
+                        <span id="confirm-contact" class="text-white font-bold">Manoj Varma (+91 94471 88231)</span>
+                    </div>
+                    <div class="flex justify-between py-1 border-b border-[#141f36]">
+                        <span class="text-slate-400" data-i18n="confirm_lang">Message Language:</span>
+                        <span id="confirm-language" class="text-emerald-400 font-bold">Malayalam (Original Text Preserved)</span>
+                    </div>
+                    <div class="flex justify-between py-1 border-b border-[#141f36]">
+                        <span class="text-slate-400" data-i18n="confirm_prio">Priority:</span>
+                        <strong id="confirm-priority" class="text-rose-400">HIGH</strong>
+                    </div>
+                    <div class="flex justify-between py-1 border-b border-[#141f36]">
+                        <span class="text-slate-400" data-i18n="confirm_score">Danger Score:</span>
+                        <strong id="confirm-danger" class="text-amber-400 font-black">91 / 100</strong>
+                    </div>
+                    <div class="flex justify-between py-1 border-b border-[#141f36]">
+                        <span class="text-slate-400" data-i18n="confirm_loc">Location:</span>
+                        <span class="text-emerald-400">Detected & Locked</span>
+                    </div>
+                    <div class="flex justify-between py-1">
+                        <span class="text-slate-400" data-i18n="confirm_status">Current Status:</span>
+                        <span class="text-yellow-400 font-bold" data-i18n="status_waiting">Waiting for rescue team assignment</span>
+                    </div>
+                </div>
+
+                <div class="p-3 bg-[#0a1122] rounded border border-[#1a2742] text-xs font-mono text-slate-300" data-i18n="confirm_beacon_notice">
+                    Keep your phone ON. Distress beacons are pinging local mesh nodes every 10 seconds.
+                </div>
+
+                <div class="flex items-center gap-3 pt-2">
+                    <button class="btn btn-primary btn-sm w-full py-2.5 font-mono" onclick="window.location.href='index.html'" data-i18n="btn_open_cmd">
+                        Open Command Dashboard
+                    </button>
+                    <button class="btn btn-secondary btn-sm w-full py-2.5 font-mono" onclick="resetVictimForm()" data-i18n="btn_send_another">
+                        Send Another SOS
+                    </button>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Dependencies -->
+    <script src="js/config.js"></script>
+    <script src="js/data/sample_data.js"></script>
+    <script src="js/services/translationService.js"></script>
+    <script src="js/services/aiAnalysisService.js"></script>
+    <script src="js/services/sosService.js"></script>
+    <script src="js/victimSos.js"></script>
+</body>
+</html>
